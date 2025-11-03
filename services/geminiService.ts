@@ -1,0 +1,1491 @@
+import { GoogleGenAI } from "@google/genai";
+import type { DeviceDetails, DeviceCategory, Book, BookDetails, Article, Conference } from '../types';
+
+const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+
+const staticData = {
+  en: {
+    deviceCategories: [
+      {
+        name: "Therapeutic Devices",
+        description: "Devices used for treating medical conditions.",
+        devices: [
+            { name: "Defibrillator", imageUrl: "/images/defibrillator.jpg" },
+            { name: "Ventilator", imageUrl: "/images/ventilator.jpg" },
+            { name: "Infusion Pump", imageUrl: "/images/infusion-pump.jpg" },
+            { name: "Dialysis Machine", imageUrl: "/images/dialysis-machine.jpg" },
+            { name: "Electrosurgical Unit", imageUrl: "/images/electrosurgical-unit.jpg" },
+            { name: "External Pacemaker", imageUrl: "/images/external-pacemaker.jpg" },
+            { name: "Insulin Pump", imageUrl: "/images/insulin-pump.jpg" },
+            { name: "Nebulizer", imageUrl: "/images/nebulizer.jpg" },
+            { name: "Surgical Laser", imageUrl: "/images/surgical-laser.jpg" },
+            { name: "Lithotripter", imageUrl: "/images/lithotripter.jpg" },
+            { name: "CPAP Machine", imageUrl: "/images/cpap-machine.jpg" },
+            { name: "Heart-Lung Machine", imageUrl: "/images/heart-lung-machine.jpg" },
+            { name: "Anesthesia Machine", imageUrl: "/images/anesthesia-machine.jpg" },
+            { name: "Gamma Knife", imageUrl: "/images/gamma-knife.jpg" },
+            { name: "Linear Accelerator", imageUrl: "/images/linear-accelerator.jpg" },
+            { name: "Hyperbaric Oxygen Chamber", imageUrl: "/images/hyperbaric-oxygen-chamber.jpg" },
+            { name: "Enteral Feeding Pump", imageUrl: "/images/enteral-feeding-pump.jpg" },
+            { name: "PCA Pump", imageUrl: "/images/pca-pump.jpg" },
+            { name: "Medical Suction Machine", imageUrl: "/images/medical-suction-machine.jpg" },
+            { name: "Cryotherapy Unit", imageUrl: "/images/cryotherapy-unit.jpg" },
+            { name: "Laser Therapy Unit", imageUrl: "/images/laser-therapy-unit.jpg" }
+        ],
+      },
+      {
+        name: "Diagnostic Devices",
+        description: "Devices used for diagnosing medical conditions.",
+        devices: [
+            { name: "ECG Machine", imageUrl: "/images/ecg-machine.jpg" },
+            { name: "Ultrasound Machine", imageUrl: "/images/ultrasound-machine.jpg" },
+            { name: "MRI Machine", imageUrl: "/images/mri-machine.jpg" },
+            { name: "CT Scanner", imageUrl: "/images/ct-scanner.jpg" },
+            { name: "Patient Monitor", imageUrl: "/images/patient-monitor.jpg" },
+            { name: "X-ray Machine", imageUrl: "/images/x-ray-machine.jpg" },
+            { name: "Endoscope", imageUrl: "/images/endoscope.jpg" },
+            { name: "Ophthalmoscope", imageUrl: "/images/ophthalmoscope.jpg" },
+            { name: "Otoscope", imageUrl: "/images/otoscope.jpg" },
+            { name: "Sphygmomanometer", imageUrl: "/images/sphygmomanometer.jpg" },
+            { name: "Pulse Oximeter", imageUrl: "/images/pulse-oximeter.jpg" },
+            { name: "Glucometer", imageUrl: "/images/glucometer.jpg" },
+            { name: "PET Scanner", imageUrl: "/images/pet-scanner.jpg" },
+            { name: "EEG Machine", imageUrl: "/images/eeg-machine.jpg" },
+            { name: "EMG Machine", imageUrl: "/images/emg-machine.jpg" },
+            { name: "Spirometer", imageUrl: "/images/spirometer.jpg" },
+            { name: "Bone Densitometer", imageUrl: "/images/bone-densitometer.jpg" },
+            { name: "Fetal Doppler", imageUrl: "/images/fetal-doppler.jpg" },
+            { name: "Bronchoscope", imageUrl: "/images/bronchoscope.jpg" },
+            { name: "Colonoscope", imageUrl: "/images/colonoscope.jpg" }
+        ],
+      },
+      {
+          name: "Rehabilitation Devices",
+          description: "Devices that assist in patient recovery and physical therapy.",
+          devices: [
+              { name: "TENS Unit", imageUrl: "/images/tens-unit.jpg" },
+              { name: "Gait Trainer", imageUrl: "/images/gait-trainer.jpg" },
+              { name: "Traction Bed", imageUrl: "/images/traction-bed.jpg" },
+              { name: "Hydrotherapy Pool", imageUrl: "/images/hydrotherapy-pool.jpg" },
+              { name: "CPM Machine", imageUrl: "/images/cpm-machine.jpg" },
+              { name: "Parallel Bars", imageUrl: "/images/parallel-bars.jpg" },
+              { name: "Therapeutic Ultrasound", imageUrl: "/images/therapeutic-ultrasound.jpg" },
+              { name: "Electrical Stimulation Machine", imageUrl: "/images/electrical-stimulation-machine.jpg" },
+              { name: "Shoulder Wheel", imageUrl: "/images/shoulder-wheel.jpg" },
+              { name: "Prosthetic Limb", imageUrl: "/images/prosthetic-limb.jpg" },
+              { name: "Orthotic Brace", imageUrl: "/images/orthotic-brace.jpg" }
+          ]
+      }
+    ],
+    deviceDetails: {
+      "Defibrillator": {
+        name: "Defibrillator",
+        principle: "A defibrillator delivers a dose of electric current to the heart to depolarize a large mass of heart muscle simultaneously, which ends the dysrhythmia and allows normal sinus rhythm to be reestablished by the body's natural pacemaker.",
+        malfunctions: [
+          { fault: "Low Battery", solution: "Replace or recharge the battery pack according to the manufacturer's instructions." },
+          { fault: "Pads Not Adhering", solution: "Ensure the patient's chest is clean and dry. Use a new set of electrode pads." },
+          { fault: "Self-Test Failure", solution: "Run a manual self-test. If the issue persists, contact a biomedical technician for service." },
+          { fault: "ECG Signal Noise", solution: "Check pad contact, ensure patient is still, and check for electronic interference." },
+          { fault: "Charging Error", solution: "Device may indicate it cannot charge to the selected energy level. Check power source. This may indicate an internal capacitor failure requiring service." },
+          { fault: "Failed to Deliver Shock", solution: "Ensure pads are well adhered and there's no air gap. Check for 'No Shock Advised' message in AED mode. If it's a hardware fault, requires immediate technical service." }
+        ],
+      },
+      "Ventilator": {
+        name: "Ventilator",
+        principle: "A ventilator is a machine that supports breathing. It gets oxygen into the lungs and removes carbon dioxide. It's used for patients who are unable to breathe on their own or require assistance to maintain adequate oxygen levels.",
+        malfunctions: [
+          { fault: "High-Pressure Alarm", solution: "Check for kinks in the tubing, patient coughing, or airway obstruction. Suction the patient if necessary." },
+          { fault: "Low-Pressure Alarm", solution: "Check for leaks in the circuit, disconnection from the patient, or an inadequate cuff seal on the endotracheal tube." },
+          { fault: "Apnea Alarm", solution: "Assess the patient's respiratory effort. The patient may have stopped breathing. Manual ventilation may be required." },
+          { fault: "Power Failure", solution: "Ensure the ventilator is plugged into a functioning emergency power outlet. If the battery is low, switch to manual ventilation." },
+          { fault: "Inaccurate Tidal Volume", solution: "Recalibrate the flow sensor. Check for leaks in the patient circuit. Ensure settings are appropriate for the patient." },
+          { fault: "O2 Sensor Failure", solution: "Calibrate the oxygen sensor. If calibration fails repeatedly, the sensor needs to be replaced." }
+        ]
+      },
+      "Infusion Pump": {
+        name: "Infusion Pump",
+        principle: "An infusion pump infuses fluids, medication, or nutrients into a patient's circulatory system. It is used in hospitals, nursing homes, and in the home.",
+        malfunctions: [
+          { fault: "Occlusion Alarm", solution: "Check the IV line for kinks, clamps, or a clotted cannula. Ensure the fluid can flow freely." },
+          { fault: "Air-in-Line Alarm", solution: "Remove air from the IV tubing by priming the line again. Check for loose connections." },
+          { fault: "Low Battery", solution: "Plug the pump into an AC outlet to charge. Replace battery if it no longer holds a charge." },
+          { fault: "Incorrect Flow Rate", solution: "Verify programming and settings. If the issue persists, the pump may need calibration by a technician." },
+          { fault: "Door Open Alarm", solution: "Ensure the pump door or cassette mechanism is securely closed and latched." },
+          { fault: "Free Flow", solution: "A dangerous condition where fluid flows unregulated. Immediately close the roller clamp on the IV set. The pump's anti-free-flow mechanism has failed and requires service." }
+        ]
+      },
+      "Dialysis Machine": {
+          name: "Dialysis Machine",
+          principle: "A dialysis machine filters a patient's blood to remove waste products like urea and creatinine, and excess water when the kidneys are dysfunctional.",
+          malfunctions: [
+              { fault: "Blood Leak Alarm", solution: "Immediately stop the treatment. Check the dialyzer and blood lines for any signs of rupture or disconnection. Do not return the blood to the patient." },
+              { fault: "High TMP Alarm", solution: "Check for clotting in the venous chamber or lines, patient access issues, or kinks in the tubing." },
+              { fault: "Conductivity Alarm", solution: "Verify the dialysate concentrate is correct and properly connected. The machine may require calibration." },
+              { fault: "Power Outage", solution: "Most machines have a battery backup. Follow emergency procedures for manual blood return if necessary." },
+              { fault: "Temperature Alarm", solution: "Verify the heater function and temperature settings. The dialysate is either too hot or too cold, which can be dangerous for the patient. Requires technical check." },
+              { fault: "Air Detector Alarm", solution: "Indicates air in the venous line. Immediately clamp the line to prevent air embolism. Check for loose connections or empty saline bags." }
+          ]
+      },
+      "Electrosurgical Unit": {
+          name: "Electrosurgical Unit",
+          principle: "An ESU uses high-frequency electrical currents to cut, coagulate, desiccate, or fulgurate biological tissue.",
+          malfunctions: [
+              { fault: "Patient Return Electrode Alarm", solution: "Ensure the grounding pad is properly adhered to the patient's skin and the connection cable is secure." },
+              { fault: "No Power Output", solution: "Check that the active electrode (pencil) is properly connected. Verify power settings. Try a different electrode." },
+              { fault: "Inadequate Cutting/Coagulation", solution: "Increase the power setting. Check the condition of the electrode tip and clean if necessary. Ensure good contact with the tissue." },
+              { fault: "RF Interference", solution: "Check all cable connections and ensure they are not coiled. Keep ESU cables away from other monitoring cables." },
+              { fault: "Split Pad Alarm", solution: "If using a dual-folie grounding pad, this indicates partial detachment. Re-apply or replace the pad to ensure full contact and prevent patient burns." }
+          ]
+      },
+       "External Pacemaker": {
+        name: "External Pacemaker",
+        principle: "Provides an electrical stimulus to the heart when its natural pacemaker fails, causing the heart to contract and pump blood.",
+        malfunctions: [
+            { fault: "Failure to Pace", solution: "No pacing spike is delivered. Check connections, battery, and ensure the device is on. Increase the output (mA) if needed." },
+            { fault: "Failure to Capture", solution: "Pacing spike is present but not followed by a QRS complex. Increase the output (mA). Reposition the patient or pacing pads to improve contact." },
+            { fault: "Failure to Sense (Oversensing)", solution: "The pacemaker is inhibited by artifacts (e.g., muscle twitches). Decrease the sensitivity (increase mV value). Check electrode contact." },
+            { fault: "Failure to Sense (Undersensing)", solution: "The pacemaker doesn't see the patient's intrinsic heartbeat and paces unnecessarily. Increase the sensitivity (decrease mV value)." }
+        ]
+    },
+    "Insulin Pump": {
+        name: "Insulin Pump",
+        principle: "A small, computerized device that delivers insulin continuously (basal rate) and in larger doses (bolus) for meals, mimicking the function of a healthy pancreas.",
+        malfunctions: [
+            { fault: "Occlusion/No Delivery Alarm", solution: "The tubing or cannula is blocked. Check for kinks. Disconnect from the body, try to prime. If it fails, change the entire infusion set." },
+            { fault: "Low Reservoir", solution: "The insulin cartridge is nearly empty. Prepare to change the reservoir soon." },
+            { fault: "Weak Battery", solution: "Replace the battery as soon as possible to avoid pump shutdown." },
+            { fault: "Hyperglycemia despite bolus", solution: "Suspect infusion site failure or bad insulin. Change the infusion set and use insulin from a new vial." }
+        ]
+    },
+    "Anesthesia Machine": {
+        name: "Anesthesia Machine",
+        principle: "Delivers a precise and continuous supply of medical gases mixed with a concentration of anesthetic vapor, while also integrating a ventilator to support patient breathing.",
+        malfunctions: [
+            { fault: "Gas Leak in Circuit", solution: "Perform a low-pressure leak test. Check all connections, hoses, and the vaporizer for leaks. Replace damaged O-rings or components." },
+            { fault: "Vaporizer Failure", solution: "Ensure the vaporizer is correctly seated and locked. Check the agent level. If malfunctioning, replace it and call for service." },
+            { fault: "O2 Sensor Failure/Calibration Error", solution: "Calibrate the O2 sensor against room air (21%) and 100% oxygen. If calibration fails, replace the sensor." },
+            { fault: "Ventilator Not Cycling", solution: "Check ventilator settings. Ensure patient circuit is not disconnected or obstructed. Switch to manual bag ventilation if necessary and call for service." }
+        ]
+    },
+      "ECG Machine": {
+        name: "ECG Machine",
+        principle: "An electrocardiogram (ECG) machine records the electrical signals of the heart. It detects the tiny electrical changes on the skin that arise from the heart muscle's electrophysiologic pattern of depolarizing and repolarizing during each heartbeat.",
+        malfunctions: [
+          { fault: "Noisy Signal (Artifacts)", solution: "Check electrode connections. Ensure the patient is still and relaxed. Check for nearby electronic devices causing interference." },
+          { fault: "Flat Line", solution: "Verify all leads are correctly attached to the patient and the machine. Check cable integrity. *Always check the patient first*." },
+          { fault: "Wandering Baseline", solution: "Ensure proper skin prep and electrode adhesion. Encourage the patient to breathe calmly. A loose electrode is a common cause." },
+          { fault: "AC Interference (60/50 Hz)", solution: "Check that the power cord is properly grounded. Move the machine away from other electrical equipment. Use the built-in filter if available." },
+          { fault: "Lead Reversal Error", solution: "The classic sign is an inverted P wave and QRS in Lead I. Re-check the placement of limb leads (RA, LA, RL, LL) to ensure they are on the correct limbs." }
+        ]
+      },
+      "Ultrasound Machine": {
+        name: "Ultrasound Machine",
+        principle: "Uses high-frequency sound waves to create images of organs and structures inside the body. A transducer sends out sound waves and detects the echoes as they bounce back.",
+        malfunctions: [
+          { fault: "Poor Image Quality", solution: "Apply more ultrasound gel. Check the transducer for damage. Adjust focus and gain settings." },
+          { fault: "Transducer Not Detected", solution: "Reconnect the transducer firmly. Try a different port if available. Restart the machine." },
+          { fault: "Artifacts in Image (e.g., shadowing)", solution: "Change the scanning angle to avoid bone or gas. Adjust machine settings like frequency and harmonics." },
+          { fault: "System Freezes", solution: "Restart the machine. If the problem persists, report to a biomedical engineer as it may be a software issue." },
+          { fault: "Cracked Transducer Lens", solution: "This can create dropout artifacts and is an electrical shock hazard. Discontinue use immediately and send for repair." }
+        ]
+      },
+      "MRI Machine": {
+        name: "MRI Machine",
+        principle: "Magnetic Resonance Imaging (MRI) uses a powerful magnetic field, radio waves, and a computer to produce detailed pictures of organs, soft tissues, bone, and virtually all other internal body structures.",
+        malfunctions: [
+          { fault: "Image Artifacts (ghosting, zippers)", solution: "Often caused by patient movement; instruct the patient to remain still. Zipper artifacts may indicate RF leakage from the room; ensure the door is closed." },
+          { fault: "Low Signal-to-Noise Ratio (SNR)", solution: "Ensure the correct coil is selected and properly positioned. Check all cable connections." },
+          { fault: "Quench (Loss of Superconductivity)", solution: "This is a serious emergency. Evacuate the room immediately and follow established safety protocols. The magnet is rapidly losing helium." },
+          { fault: "System Communication Error", solution: "Reboot the host computer and the image processor. Check network cable connections." },
+          { fault: "Coil Failure", solution: "System does not recognize the coil or images have severe artifacts. Try reconnecting the coil. If it persists, the coil is likely damaged and needs repair." }
+        ]
+      },
+      "CT Scanner": {
+        name: "CT Scanner",
+        principle: "Computed Tomography (CT) combines a series of X-ray images taken from different angles around your body and uses computer processing to create cross-sectional images (slices) of the bones, blood vessels, and soft tissues.",
+        malfunctions: [
+          { fault: "Tube Overheating", solution: "Allow the X-ray tube to cool down between scans. Follow the manufacturer's guidelines for scan intervals." },
+          { fault: "Streaking Artifacts", solution: "Caused by dense objects like metal implants or patient movement. Use artifact reduction software if available." },
+          { fault: "Gantry Fails to Rotate", solution: "Emergency stop may be engaged. If not, this is a major fault requiring service from a qualified engineer." },
+          { fault: "Table Movement Error", solution: "Check for obstructions around the patient table. Reboot the system. If the problem persists, call for service." },
+          { fault: "Ring Artifacts", solution: "Often caused by a miscalibrated or faulty detector element. A system calibration (air calibration) should be performed. If it persists, service is required." }
+        ]
+      },
+      "Patient Monitor": {
+        name: "Patient Monitor",
+        principle: "A multi-parameter device that measures, records, and displays various patient physiological signs such as ECG, respiratory rate, blood pressure, and SpO2.",
+        malfunctions: [
+          { fault: "False Alarms", solution: "Check sensor placement and patient condition. Adjust alarm limits to be appropriate for the patient." },
+          { fault: "Inaccurate SpO2 Reading", solution: "Reposition the SpO2 sensor. Check for poor perfusion, nail polish, or excessive patient movement." },
+          { fault: "NIBP Cuff Fails to Inflate", solution: "Check that the air hose is properly connected to both the monitor and the cuff. Check for leaks in the cuff or hose." },
+          { fault: "Loss of ECG Signal", solution: "Check that all ECG electrodes are attached and have good skin contact. Check the patient cable connection." },
+          { fault: "Display Freezes or is Blank", solution: "Attempt to restart the monitor. If it fails to reboot, it may be a power supply or software issue requiring technical support." }
+        ]
+      },
+      "X-ray Machine": {
+        name: "X-ray Machine",
+        principle: "Generates X-rays, a form of electromagnetic radiation, which are passed through the body to create images of internal structures. Dense structures like bone absorb more X-rays and appear white.",
+        malfunctions: [
+          { fault: "No X-ray Exposure", solution: "Check that the machine is powered on and the exposure hand switch is functioning. Ensure all safety interlocks (e.g., door closed) are met." },
+          { fault: "Image Too Dark or Too Light", solution: "Adjust exposure factors (kVp, mAs). Check the distance between the tube and the detector (SID)." },
+          { fault: "Mechanical Jam (Tube or Bucky)", solution: "Release all locks and try to move the equipment gently. Do not force it. Call for service if it remains stuck." },
+          { fault: "Error Code on Console", solution: "Note the error code and consult the user manual. A system reboot may solve some issues, otherwise, call for service." },
+          { fault: "Collimator Light Failure", solution: "The light bulb in the collimator has burned out and needs to be replaced by a technician. Accurate positioning is difficult without it." }
+        ]
+      },
+      "Endoscope": {
+        name: "Endoscope",
+        principle: "Uses a flexible tube with a light and camera to examine the interior of a hollow organ or cavity of the body.",
+        malfunctions: [
+            { fault: "Poor or No Light Output", solution: "Check if the light source is turned on and the bulb is functional. Ensure the light guide cable is properly connected to both the scope and source." },
+            { fault: "Blurry or Foggy Image", solution: "Clean the distal lens. Use an anti-fog solution. Insufflation may be poor, causing the lens to touch tissue." },
+            { fault: "Water Jet or Air/Water Nozzle Clogged", solution: "Attempt to flush the channel with water. If it remains clogged, it needs to be professionally cleaned and serviced." },
+            { fault: "Angulation Failure", solution: "The control knobs do not move the scope tip. This is a mechanical failure of the angulation wires, requiring immediate repair." }
+        ]
+    },
+    "Pulse Oximeter": {
+        name: "Pulse Oximeter",
+        principle: "A non-invasive method for monitoring a person's oxygen saturation (SpO2). A sensor placed on a thin part of the patient's body, usually a fingertip or earlobe, passes two wavelengths of light through the body to a photodetector.",
+        malfunctions: [
+          { fault: "No Reading or Searching", solution: "Ensure the sensor is properly positioned. Check for poor circulation, cold extremities, or dark nail polish." },
+          { fault: "Inaccurate Reading", solution: "Check for patient movement, ambient light interference, or improper sensor type for the patient (e.g., adult vs. pediatric)." },
+          { fault: "Low Signal Strength (Low Perfusion)", solution: "Reposition the sensor to a better-perfused site, like a different finger or an earlobe. Warm the extremity." },
+          { fault: "Sensor Malfunction", solution: "Check the sensor for visible damage and ensure the cable is not frayed. Try a different sensor." },
+          { fault: "Signal Interference", solution: "Caused by carbon monoxide poisoning (falsely high reading), or certain dyes like methylene blue (falsely low reading)." }
+        ]
+      },
+      "Glucometer": {
+        name: "Glucometer",
+        principle: "Measures the approximate concentration of glucose in the blood. A test strip with chemicals reacts with glucose in a drop of blood, and the meter reads the result of this reaction.",
+        malfunctions: [
+            { fault: "Error Code on Display", solution: "Refer to the user manual for the specific error code. Common issues include used test strip, insufficient blood sample, or temperature out of range." },
+            { fault: "Inconsistent or Unbelievable Readings", solution: "Perform a quality control test with control solution. Ensure hands are clean and dry. Check the expiration date of the test strips." },
+            { fault: "Meter Will Not Turn On", solution: "Check and replace the batteries. Clean the battery contacts." },
+            { fault: "Coding Error", solution: "If the meter requires coding, ensure the code on the meter matches the code on the vial of test strips." }
+        ]
+      },
+      "TENS Unit": {
+        name: "TENS Unit",
+        principle: "Transcutaneous Electrical Nerve Stimulation (TENS) is a method of pain relief involving the use of a mild electrical current. A TENS machine is a small, battery-operated device that has leads connected to sticky pads called electrodes.",
+        malfunctions: [
+          { fault: "No Sensation", solution: "Check battery levels. Ensure leads are fully plugged into the unit and the electrodes. Increase the intensity." },
+          { fault: "Poor Electrode Adhesion", solution: "Clean the skin with soap and water before application. Replace the electrodes if they are no longer sticky." },
+          { fault: "Uneven Stimulation", solution: "Ensure both electrodes from a single channel are properly adhered to the skin. Check lead wires for damage." },
+          { fault: "Skin Irritation", solution: "Discontinue use in that area. Try a different type of electrode (e.g., for sensitive skin). Ensure the skin is clean before use." },
+          { fault: "Intermittent Output", solution: "Often caused by a broken lead wire. Try wiggling the wire to identify the break. Replace the lead wires." }
+        ]
+      },
+      "Therapeutic Ultrasound": {
+        name: "Therapeutic Ultrasound",
+        principle: "Uses high-frequency sound waves to treat musculoskeletal injuries. It generates deep heat within tissues to promote healing, reduce inflammation, and decrease pain.",
+        malfunctions: [
+            { fault: "No Heat Sensation", solution: "Ensure sufficient coupling gel is used. Check that the intensity setting is appropriate. The machine may not be emitting power." },
+            { fault: "Overheating Transducer Head", solution: "This is a sign of a critical fault, possibly a damaged crystal. Discontinue use immediately and send for service." },
+            { fault: "Output Power Error", solution: "The machine's internal calibration is off. It requires servicing and recalibration by a qualified technician." },
+            { fault: "Unit Won't Power On", solution: "Check the power cord and outlet. Check the main fuse if accessible." }
+        ]
+    },
+    "Nebulizer": {
+        name: "Nebulizer",
+        principle: "A nebulizer is a drug delivery device used to administer medication in the form of a mist inhaled into the lungs. It uses oxygen, compressed air or ultrasonic power to break up solutions and suspensions into small aerosol droplets that can be directly inhaled from the mouthpiece of the device.",
+        malfunctions: [
+            { fault: "No aerosol production", solution: "Check power source. Ensure medication cup is not empty and the jet nozzle is not clogged. Clean the nozzle." },
+            { fault: "Weak aerosol output", solution: "The filter may be dirty; clean or replace it. Check tubing for kinks or leaks." },
+            { fault: "Device is noisy", solution: "This is often normal for compressor nebulizers. If noise increases suddenly, check the filter and ensure the device is on a stable surface." },
+            { fault: "Medication leaks from cup", solution: "Ensure the medication cup is assembled correctly and the lid is screwed on tightly." }
+        ]
+    },
+    "CPAP Machine": {
+        name: "CPAP Machine",
+        principle: "A Continuous Positive Airway Pressure (CPAP) machine treats obstructive sleep apnea by delivering a steady stream of pressurized air through a mask, which keeps the upper airway from collapsing during sleep.",
+        malfunctions: [
+            { fault: "Mask Leak", solution: "Adjust mask straps for a better seal without over-tightening. Try a different mask size or style. Ensure the mask cushion is clean." },
+            { fault: "Dry Mouth or Nose", solution: "Use a heated humidifier. Check the humidifier settings. Check for mouth leaks (may require a chin strap)." },
+            { fault: "Low Pressure Alarm", solution: "Check for large mask leaks or hose disconnection. Ensure the water chamber is properly seated." },
+            { fault: "Water Buildup in Hose (Rainout)", solution: "Use an insulated or heated hose. Lower the humidifier setting. Position the machine lower than the bed." }
+        ]
+    },
+    "Ophthalmoscope": {
+        name: "Ophthalmoscope",
+        principle: "An ophthalmoscope is a handheld instrument that allows a physician to examine the interior of the eye, including the retina, optic disc, and blood vessels. It shines a light through the pupil and uses lenses to magnify the view.",
+        malfunctions: [
+            { fault: "Light not working", solution: "Replace the batteries. Check that the bulb is not burned out and is properly seated." },
+            { fault: "Dim light", solution: "Batteries are weak and need replacement. The bulb may be old." },
+            { fault: "Difficulty focusing", solution: "Clean the lenses on the instrument. Ensure the correct lens disc is selected for your own and the patient's refractive error." },
+            { fault: "Lens dial is stuck", solution: "Dust or debris may have entered the mechanism. Requires professional cleaning." }
+        ]
+    },
+    "Sphygmomanometer": {
+        name: "Sphygmomanometer",
+        principle: "A sphygmomanometer measures blood pressure. The aneroid type consists of an inflatable cuff, a measuring unit (the gauge), and an inflation bulb. The cuff is inflated to compress the artery, then slowly deflated while listening with a stethoscope for Korotkoff sounds to determine systolic and diastolic pressure.",
+        malfunctions: [
+            { fault: "Air leak in cuff or tubing", solution: "Inspect the cuff and tube for cracks or holes. Replace damaged components." },
+            { fault: "Gauge doesn't return to zero", solution: "The gauge may need to be recalibrated. This is a common issue in older or dropped units." },
+            { fault: "Difficulty inflating cuff", solution: "Check that the valve on the inflation bulb is tightly closed. Check the valve for debris or damage." },
+            { fault: "Inaccurate readings", solution: "Ensure correct cuff size is used for the patient's arm. Ensure proper cuff placement. Recalibrate the gauge against a known accurate device." }
+        ]
+    },
+    "Gait Trainer": {
+        name: "Gait Trainer",
+        principle: "A gait trainer is a rehabilitation device that provides postural and weight-bearing support to help individuals with physical disabilities improve their ability to walk.",
+        malfunctions: [
+            { fault: "Wheels don't turn smoothly", solution: "Clean wheels of hair and debris. Lubricate wheel axles if required." },
+            { fault: "Locking mechanism fails", solution: "Inspect the locking mechanism for damage or misalignment. Tighten any loose screws or bolts." },
+            { fault: "Support pads are worn out", solution: "Replace worn pads or straps to ensure patient safety and comfort." },
+            { fault: "Difficulty with height adjustment", solution: "Ensure the adjustment mechanism is fully released. Lubricate sliding posts if they are sticky." }
+        ]
+    },
+    "CPM Machine": {
+        name: "CPM Machine",
+        principle: "A Continuous Passive Motion (CPM) machine gently and slowly moves a joint through a prescribed range of motion without the patient having to use their muscles. It is typically used after joint surgery to reduce stiffness and improve recovery.",
+        malfunctions: [
+            { fault: "Machine won't start", solution: "Check that the power supply is connected. Inspect the handheld controller for damage. Check the emergency stop switch." },
+            { fault: "Jerky or uneven motion", solution: "The motors or gears may need lubrication or service. Check for obstructions in the movement path." },
+            { fault: "Range settings are incorrect", solution: "Reprogram the range of motion settings as per the doctor's prescription. Reboot the machine to reset it." },
+            { fault: "Controller is unresponsive", solution: "Check the cable connecting the controller. The controller may need to be replaced." }
+        ]
+    },
+    "Surgical Laser": {
+        name: "Surgical Laser",
+        principle: "A surgical laser uses a highly focused beam of light to cut, vaporize, or coagulate tissue. Different types of lasers (e.g., CO2, Nd:YAG) are used for specific procedures, offering high precision, minimal bleeding, and reduced scarring.",
+        malfunctions: [
+            { fault: "Low Laser Power", solution: "Check the power settings. The laser source may be aging and require replacement. Check for dirty or misaligned optics." },
+            { fault: "Aiming Beam Not Visible", solution: "The aiming beam diode may have failed. This does not affect the main laser but makes targeting difficult. Requires service to replace the diode." },
+            { fault: "Cooling System Fault", solution: "The laser is overheating. Check coolant levels and ensure there are no kinks in the cooling lines. Clean dust from cooling fans." },
+            { fault: "Foot Pedal Unresponsive", solution: "Check the connection of the foot pedal to the main unit. The cable or switch might be damaged." }
+        ]
+    },
+    "Heart-Lung Machine": {
+        name: "Heart-Lung Machine",
+        principle: "A heart-lung machine, or cardiopulmonary bypass pump, temporarily takes over the function of the heart and lungs during surgery, maintaining the circulation of blood and the oxygen content of the body. It consists of pumps, an oxygenator, and filters.",
+        malfunctions: [
+            { fault: "Oxygenator Failure", solution: "A critical failure. May be caused by clotting. The perfusionist must follow emergency protocols, which may include replacing the oxygenator mid-procedure." },
+            { fault: "Tubing Disconnection", solution: "A catastrophic event. All connections must be double-checked before bypass. If it occurs, the surgeon must immediately address the situation while the perfusionist clamps lines." },
+            { fault: "Pump Malfunction", solution: "Most systems have a hand-crank for manual operation in case of total power or pump motor failure. The perfusionist will immediately switch to manual pumping." },
+            { fault: "Air Embolism", solution: "Air detected in the arterial line. The perfusionist must immediately clamp the line and execute a de-airing procedure to prevent air from reaching the patient." }
+        ]
+    },
+    "Otoscope": {
+        name: "Otoscope",
+        principle: "An otoscope is a medical device used to look into the ears. It consists of a handle, a head with a light source and a magnifying lens, and a disposable speculum to be inserted into the ear canal for a clear view of the eardrum and ear canal.",
+        malfunctions: [
+            { fault: "Light Not Working", solution: "Replace the batteries in the handle. If that fails, the bulb has likely burned out and needs replacement." },
+            { fault: "Dim Light", solution: "Weak batteries are the most common cause. Replace them. If the light is still dim, the bulb might be nearing the end of its life." },
+            { fault: "Speculum Fits Loosely", solution: "Ensure you are using the correct size and brand of speculum for the otoscope model. The attachment point may be worn and require service." },
+            { fault: "View is Obstructed", solution: "Clean the magnifying lens with a soft cloth. Ensure the ear canal is not blocked by wax before insertion." }
+        ]
+    },
+    "EEG Machine": {
+        name: "EEG Machine",
+        principle: "An electroencephalogram (EEG) machine measures and records the electrical activity of the brain. Electrodes are placed on the scalp to detect tiny electrical charges that result from the activity of brain cells. These signals are amplified and displayed as a graph.",
+        malfunctions: [
+            { fault: "High Electrode Impedance", solution: "Re-prep the skin site and re-apply the electrode with sufficient conductive gel. Ensure the electrode is making good contact." },
+            { fault: "60/50 Hz Interference", solution: "Ensure the machine is properly grounded. Turn off nearby non-essential electrical devices. Use the machine's notch filter." },
+            { fault: "No Signal from an Electrode", solution: "Check the connection of the electrode to the headbox. The electrode wire may be broken. Try a different electrode." },
+            { fault: "Muscle Artifact (EMG)", solution: "Ask the patient to relax their jaw and neck muscles. Ensure they are comfortable to minimize movement." }
+        ]
+    },
+    "Traction Bed": {
+        name: "Traction Bed",
+        principle: "A traction bed is used in physical therapy to apply a pulling force to the spine or limbs. This process, known as traction, helps to relieve pressure on nerves, reduce pain, and align bones. It uses a system of weights, pulleys, and ropes.",
+        malfunctions: [
+            { fault: "Weight System Slips", solution: "Inspect ropes for fraying and pulleys for damage. Ensure weights are securely attached and can move freely." },
+            { fault: "Bed Angle Adjustment Fails", solution: "Check the locking mechanism for the bed sections. The hydraulic or electric motor may require service." },
+            { fault: "Harnesses are Worn", solution: "Replace worn or frayed harnesses and straps to ensure patient safety and effective application of traction." },
+            { fault: "Inconsistent Pulling Force", solution: "Ensure the traction path is clear of obstructions. On mechanical units, check for calibration issues. Requires technician." }
+        ]
+    },
+    "Prosthetic Limb": {
+        name: "Prosthetic Limb",
+        principle: "A prosthetic limb is an artificial device that replaces a missing body part, such as a leg, arm, hand, or foot. Modern prosthetics can be highly advanced, using microprocessors and myoelectric sensors to mimic natural movement and provide functional restoration.",
+        malfunctions: [
+            { fault: "Poor Socket Fit", solution: "The socket is causing discomfort or skin breakdown. Requires adjustment or refitting by a prosthetist as the residual limb changes shape." },
+            { fault: "Myoelectric Sensor Issues", solution: "Sensors are not picking up muscle signals correctly. Ensure skin is clean and dry. The sensors may need recalibration or replacement." },
+            { fault: "Battery Not Holding Charge", solution: "For powered prosthetics, the battery pack may be at the end of its life and needs to be replaced." },
+            { fault: "Unusual Noises (clicks, squeaks)", solution: "Mechanical joints may require lubrication or adjustment. A prosthetist should inspect the device for worn components." }
+        ]
+    },
+    "Electrical Stimulation Machine": {
+        name: "Electrical Stimulation Machine",
+        principle: "An electrical stimulation machine delivers low-level electrical impulses to nerves or muscles through electrodes placed on the skin. It is used for various purposes, including muscle strengthening, pain management (like TENS), and preventing muscle atrophy.",
+        malfunctions: [
+            { fault: "Inconsistent Output", solution: "Check the lead wires for damage, as breaks are common. Ensure electrode pads are moist and making good contact with the skin." },
+            { fault: "Unit Won't Turn On", solution: "Check the batteries or power adapter. Clean battery contacts if they appear corroded." },
+            { fault: "Sudden Intensity Spike", solution: "A dangerous fault. Discontinue use immediately. The device's control circuit is likely damaged and requires service." },
+            { fault: "Controls are Unresponsive", solution: "The buttons or dials may be dirty or worn out. The device may need to be professionally cleaned or repaired." }
+        ]
+    },
+    "Shoulder Wheel": {
+        name: "Shoulder Wheel",
+        principle: "A shoulder wheel is a simple mechanical device used in physical therapy to increase the range of motion of the shoulder joint. The patient turns the wheel with their hand, which guides the shoulder through controlled circular movements.",
+        malfunctions: [
+            { fault: "Wheel is Stiff or Jerky", solution: "The central axle needs lubrication. Clean any dust or debris from the mechanism." },
+            { fault: "Handle is Loose", solution: "Tighten the bolt or screw that secures the handle to the wheel." },
+            { fault: "Height Adjustment is Stuck", solution: "Loosen the locking knob completely. Lubricate the sliding vertical post if necessary." },
+            { fault: "Resistance Control Not Working", solution: "The friction brake pad may be worn out and need replacement. Check the tensioning mechanism." }
+        ]
+    },
+    "Orthotic Brace": {
+        name: "Orthotic Brace",
+        principle: "An orthotic brace is an external device used to support, align, prevent, or correct deformities or to improve the function of movable parts of the body. They are custom-fitted or prefabricated and used for joints like the knee, ankle, or spine.",
+        malfunctions: [
+            { fault: "Straps Losing Grip", solution: "The Velcro or fastening material is worn out. The straps need to be replaced by an orthotist." },
+            { fault: "Plastic Shell Cracked", solution: "A crack compromises the structural integrity of the brace. It must be replaced to avoid injury." },
+            { fault: "Padding is Worn or Compressed", solution: "Worn padding can cause pressure sores. The brace needs to be relined by a professional." },
+            { fault: "Joint Hinge Malfunction", solution: "The mechanical joint is stiff, loose, or not locking correctly. It requires adjustment or repair by an orthotist." }
+        ]
+    },
+    "Lithotripter": {
+        name: "Lithotripter",
+        principle: "Uses high-energy shock waves to break kidney stones and other calculus into smaller pieces that can be passed from the body. The procedure is non-invasive.",
+        malfunctions: [
+            { fault: "Low Shock Wave Energy", solution: "Check power settings. The shockwave generator may need servicing or replacement. Check the water quality in the system." },
+            { fault: "Targeting Error", solution: "The imaging system (ultrasound or X-ray) used for localization is out of calibration. Recalibrate the targeting system." },
+            { fault: "Water Cushion Leak", solution: "The flexible membrane that couples the shockwave to the patient is damaged. Replace the water cushion membrane." },
+            { fault: "System Error Code", solution: "A general fault has been detected. Reboot the system. If the error persists, consult the service manual and call a technician." }
+        ]
+    },
+    "Gamma Knife": {
+        name: "Gamma Knife",
+        principle: "A radiosurgery device that uses multiple (192 or 201) beams of gamma radiation to precisely target and destroy tumors and other abnormalities in the brain without a surgical incision.",
+        malfunctions: [
+            { fault: "Radiation Source Error", solution: "Indicates a problem with one of the Cobalt-60 sources or the shielding. Requires immediate service by qualified personnel." },
+            { fault: "Patient Positioning System (PPS) Fault", solution: "The automated couch has a movement error or is not correctly calibrated. Check for obstructions, then recalibrate the system." },
+            { fault: "Collimator Helmet Error", solution: "The system cannot verify the correct helmet size or the helmet is not seated properly. Re-seat the helmet or try a different one." },
+            { fault: "Treatment Planning System Communication Failure", solution: "Check network connections between the planning station and the treatment unit. Reboot the relevant components." }
+        ]
+    },
+    "Linear Accelerator": {
+        name: "Linear Accelerator",
+        principle: "A device used for external beam radiation treatments for cancer. It accelerates electrons to high energy and allows them to collide with a heavy metal target, producing high-energy X-rays which are then conformed to the tumor's shape.",
+        malfunctions: [
+            { fault: "Dosimetry System Error", solution: "The machine's dose monitoring system detects a discrepancy. The beam will be inhibited. Requires a medical physicist to check and recalibrate." },
+            { fault: "Gantry/Collimator/Couch Movement Fault", solution: "A motor, sensor, or interlock has failed. The system will stop. Requires a service engineer." },
+            { fault: "Vacuum System Failure", solution: "The accelerator guide loses its vacuum, preventing electron acceleration. Requires service to find and fix the leak." },
+            { fault: "RF System Fault (Magnetron/Klystron)", solution: "The radiofrequency generator that powers the accelerator has failed. The machine cannot produce the beam. Requires service." }
+        ]
+    },
+    "Hyperbaric Oxygen Chamber": {
+        name: "Hyperbaric Oxygen Chamber",
+        principle: "A chamber that allows a person to breathe pure oxygen in a pressurized environment. This high pressure allows the lungs to gather much more oxygen than would be possible at normal air pressure, which promotes healing.",
+        malfunctions: [
+            { fault: "Failure to Pressurize", solution: "Check for leaks in door seals and valves. Ensure the compressed air source is functional and connected." },
+            { fault: "Pressure Fluctuation", solution: "The pressure regulator may be malfunctioning. This requires inspection and calibration by a technician." },
+            { fault: "Communication System Failure", solution: "The intercom system between patient and operator is down. Check connections and power. Do not operate until fixed." },
+            { fault: "High O2 Concentration Alarm", solution: "Risk of fire. Ventilate the chamber immediately. The oxygen sensor may need recalibration or replacement." }
+        ]
+    },
+    "Enteral Feeding Pump": {
+        name: "Enteral Feeding Pump",
+        principle: "A pump used to deliver nutrient-rich formula directly to the stomach or small intestine through a feeding tube.",
+        malfunctions: [
+            { fault: "Occlusion Alarm", solution: "Check the feeding tube for kinks or clogs. Flush the tube with water as per protocol." },
+            { fault: "No Flow / Empty Bag Alarm", solution: "The feeding bag is empty; replace it. Ensure the feeding set is correctly loaded into the pump." },
+            { fault: "Low Battery", solution: "Plug the pump into an AC outlet. The battery may need replacement if it doesn't hold a charge." },
+            { fault: "Incorrect Dose Delivered", solution: "Verify the rate and dose settings. The pump may need to be recalibrated by a technician." }
+        ]
+    },
+    "PCA Pump": {
+        name: "PCA Pump",
+        principle: "Patient-Controlled Analgesia (PCA) pump is a device that allows a patient to self-administer small, controlled doses of pain medication. It is programmed with specific limits to prevent overdose.",
+        malfunctions: [
+            { fault: "Occlusion Alarm", solution: "Check the IV line for kinks or a blocked catheter. Ensure all clamps are open." },
+            { fault: "Syringe Not Detected", solution: "Ensure the syringe is the correct size and is properly seated in the pump mechanism." },
+            { fault: "Low Battery", solution: "Connect the pump to a power source. Replace the battery pack if it is old." },
+            { fault: "Programming Error", solution: "Requires two nurses to independently verify and confirm the programmed settings to prevent medication errors." }
+        ]
+    },
+    "Medical Suction Machine": {
+        name: "Medical Suction Machine",
+        principle: "A device used to remove obstructions — like mucus, saliva, blood, or secretions — from a person's airway. It generates negative pressure to pull out the fluids through a catheter.",
+        malfunctions: [
+            { fault: "Low or No Suction", solution: "Check for leaks in the tubing and connections. Ensure the collection canister lid is sealed. Check if the canister is full." },
+            { fault: "Filter is Clogged", solution: "The hydrophobic filter may be clogged with fluid, blocking airflow. Replace the filter." },
+            { fault: "Machine is Overheating", solution: "Ensure the ventilation ports on the machine are not blocked. Clean any dust from the vents." },
+            { fault: "Noisy Operation", solution: "The motor may be worn. If the noise is excessive, the unit requires servicing." }
+        ]
+    },
+    "Cryotherapy Unit": {
+        name: "Cryotherapy Unit",
+        principle: "Uses extreme cold to freeze and destroy abnormal tissue, such as warts or precancerous cells. This is typically done using liquid nitrogen or argon gas.",
+        malfunctions: [
+            { fault: "Probe not freezing", solution: "Ensure the gas cylinder (e.g., liquid nitrogen) is not empty and is properly connected. Check for blockages in the cryoprobe tip." },
+            { fault: "Gas Leak", solution: "You can hear a hissing sound. Immediately close the valve on the gas cylinder and ventilate the room. Check all connections and seals." },
+            { fault: "Inconsistent Temperature", solution: "The temperature regulator or sensor may be faulty. The unit requires calibration or service." },
+            { fault: "Display Error", solution: "The control unit is showing an error code. Reboot the system. Consult the manual for the specific code." }
+        ]
+    },
+    "Laser Therapy Unit": {
+        name: "Laser Therapy Unit",
+        principle: "Also known as low-level laser therapy (LLLT), it uses specific wavelengths of light to interact with tissue, which is thought to accelerate the healing process. It is used to help reduce pain and inflammation.",
+        malfunctions: [
+            { fault: "No Laser Output", solution: "Check that the unit is powered on and the handpiece is properly connected. Ensure the safety interlock key is engaged." },
+            { fault: "Low Power Reading", solution: "The laser diode may be aging and losing power. The unit requires calibration by a technician." },
+            { fault: "Overheating Handpiece", solution: "The cooling fan in the handpiece or main unit may have failed. Discontinue use and have it serviced." },
+            { fault: "Error Code on Display", solution: "Note the code and consult the user manual. A system reboot may resolve the issue." }
+        ]
+    },
+    "PET Scanner": {
+        name: "PET Scanner",
+        principle: "Positron Emission Tomography (PET) is a nuclear medicine imaging technique that uses a small amount of a radioactive drug (tracer) to show how tissues and organs are functioning. It is often used to detect cancer.",
+        malfunctions: [
+            { fault: "Detector Failure", solution: "A block of detectors is not providing a signal. This is a major fault requiring a service engineer to replace the detector module." },
+            { fault: "Image Artifacts", solution: "Can be caused by patient movement or miscalibration. Perform a daily quality control scan with a phantom to check calibration." },
+            { fault: "Gantry Communication Error", solution: "The control console has lost connection with the scanner gantry. Check network cables and reboot the system." },
+            { fault: "Table Movement Error", solution: "The patient table is not moving correctly. Check for obstructions. The table control system may need service." }
+        ]
+    },
+    "EMG Machine": {
+        name: "EMG Machine",
+        principle: "Electromyography (EMG) measures muscle response or electrical activity in response to a nerve's stimulation of the muscle. It is used to help detect neuromuscular abnormalities.",
+        malfunctions: [
+            { fault: "High Signal Noise", solution: "Ensure proper skin preparation and grounding of the patient. Check for nearby sources of electrical interference (e.g., power lines, other equipment)." },
+            { fault: "No Signal from Electrode", solution: "Check the electrode connection to the amplifier. The electrode wire may be broken. Try a different electrode." },
+            { fault: "Stimulator Not Working", solution: "Check the connection of the stimulating electrode. The stimulator output may have failed, requiring service." },
+            { fault: "Software Freezes", solution: "The acquisition computer has frozen. Reboot the software. If it persists, there may be a hardware conflict." }
+        ]
+    },
+    "Spirometer": {
+        name: "Spirometer",
+        principle: "A device for measuring the volume of air inspired and expired by the lungs. It is used to diagnose conditions such as asthma, pulmonary fibrosis, and COPD.",
+        malfunctions: [
+            { fault: "Inaccurate Readings", solution: "The device needs calibration. Perform a calibration check with a 3-liter calibration syringe." },
+            { fault: "Flow Sensor Blocked", solution: "The turbine or pneumotach sensor is obstructed by debris or moisture. Clean or replace the sensor according to manufacturer instructions." },
+            { fault: "Device Won't Connect to PC", solution: "Check the USB or Bluetooth connection. Reinstall the device drivers on the computer." },
+            { fault: "Leak Detected", solution: "Ensure the patient has a tight seal around the mouthpiece. Check the tubing for cracks or loose connections." }
+        ]
+    },
+    "Bone Densitometer": {
+        name: "Bone Densitometer",
+        principle: "Also known as a DEXA scanner (Dual-Energy X-ray Absorptiometry), it uses a very small dose of ionizing radiation to produce pictures of the inside of the body to measure bone loss.",
+        malfunctions: [
+            { fault: "Failed Daily QA Test", solution: "The daily quality assurance scan using a phantom failed. Do not scan patients. Repeat the QA scan. If it fails again, call for service." },
+            { fault: "X-ray Source Error", solution: "The X-ray tube has failed or is not receiving power. Requires service by a qualified engineer." },
+            { fault: "Detector Arm Fails to Move", solution: "The motor or control board for the scanning arm has failed. Check for error codes and call for service." },
+            { fault: "Image Artifacts", solution: "Caused by patient movement or radiopaque objects like buttons or zippers. Ensure the patient is positioned correctly and has removed all metal objects." }
+        ]
+    },
+    "Fetal Doppler": {
+        name: "Fetal Doppler",
+        principle: "A handheld ultrasound transducer used to detect the fetal heartbeat for prenatal care. It uses the Doppler effect to provide an audible simulation of the heartbeat.",
+        malfunctions: [
+            { fault: "No Sound or High Static", solution: "Apply more ultrasound gel. Replace the batteries. The probe cable may be damaged; try wiggling it to check for intermittent connection." },
+            { fault: "Low Volume", solution: "Check the volume control. The speaker may be failing. Try plugging in headphones to check if the audio circuit is working." },
+            { fault: "Probe Not Working", solution: "The crystal in the ultrasound probe may be cracked or damaged. The probe needs to be replaced." },
+            { fault: "Inaccurate Heart Rate Display", solution: "Often picks up the maternal heart rate instead. Reposition the probe to find the fetal heartbeat. The calculation software may also be faulty." }
+        ]
+    },
+    "Bronchoscope": {
+        name: "Bronchoscope",
+        principle: "A thin, flexible tube with a light and camera that is passed through the nose or mouth, down the throat, into the lungs to examine the airways.",
+        malfunctions: [
+            { fault: "Poor or No Light Output", solution: "Check if the light source is turned on and the bulb is functional. Ensure the light guide cable is properly connected." },
+            { fault: "Blurry Image", solution: "The lens at the tip is dirty. Clean the distal lens. The camera sensor may be failing, requiring repair." },
+            { fault: "Suction Channel Clogged", solution: "Attempt to flush the channel with sterile water. If it remains clogged, it needs to be professionally serviced and cleaned." },
+            { fault: "Angulation Failure", solution: "The control knobs do not move the scope tip. The internal angulation wires are broken, and the scope must be sent for repair." }
+        ]
+    },
+    "Colonoscope": {
+        name: "Colonoscope",
+        principle: "A flexible, lighted tube with a camera that is used to examine the entire length of the colon and rectum.",
+        malfunctions: [
+            { fault: "Clogged Water Jet Nozzle", solution: "The nozzle used for clearing the view is blocked. Attempt to flush it. If it remains blocked, it requires professional cleaning." },
+            { fault: "Image is Dark or has Black Spots", solution: "This can indicate broken optical fibers within the scope's insertion tube. The scope needs to be repaired." },
+            { fault: "Air/Water Valves Sticking", solution: "The valves on the control handle are difficult to press or are stuck. They need to be removed, cleaned, and lubricated or replaced." },
+            { fault: "Buckling of Insertion Tube", solution: "The scope is not advancing due to forming a loop within the colon. Requires a change in patient position or withdrawal and re-insertion of the scope." }
+        ]
+    },
+    "Hydrotherapy Pool": {
+        name: "Hydrotherapy Pool",
+        principle: "A specialized pool, typically warmer than a normal swimming pool, used for therapeutic exercises. The water's buoyancy reduces pressure on joints, and the warmth soothes muscles.",
+        malfunctions: [
+            { fault: "Heater Not Working", solution: "Check the heater's power supply and thermostat settings. The heating element may have failed and needs replacement." },
+            { fault: "Filtration System Failure", solution: "The pump is not running or the filter is clogged. Check the pump's circuit breaker. Clean or backwash the filter." },
+            { fault: "Patient Lift Malfunction", solution: "The hydraulic or electric lift is not working. Check power supply/hydraulic fluid. The lift requires regular safety inspections and maintenance." },
+            { fault: "Chemical Imbalance", solution: "Water pH or chlorine levels are incorrect. Test the water and add chemicals as required to maintain safe and comfortable conditions." }
+        ]
+    },
+    "Parallel Bars": {
+        name: "Parallel Bars",
+        principle: "A simple rehabilitation device consisting of two parallel handrails used to help patients regain strength, balance, and range of motion, particularly for walking.",
+        malfunctions: [
+            { fault: "Bars are Unstable or Wobbly", solution: "Tighten all bolts on the base and upright supports. Ensure the floor surface is level." },
+            { fault: "Height Adjustment is Stuck", solution: "The locking pins or clamps are jammed. Ensure they are fully disengaged before trying to adjust. May require lubrication." },
+            { fault: "Handrail Surface is Damaged", solution: "Cracks or splinters on the handrails can be a safety hazard. The handrails should be repaired or replaced." },
+            { fault: "Width Adjustment Slips", solution: "The locking mechanism for the bar width is not holding. Inspect and tighten or repair the locking system." }
+        ]
+    }
+    },
+    books: [
+      { title: "Biomedical Instrumentation and Measurements", author: "Leslie Cromwell", description: "A classic textbook covering the principles of biomedical instrumentation." },
+      { title: "Medical Devices: Use and Sourcing", author: "WHO", description: "A guide for healthcare professionals on selecting and managing medical devices." },
+    ],
+    bookDetails: {
+        "Biomedical Instrumentation and Measurements": {
+            title: "Biomedical Instrumentation and Measurements",
+            author: "Leslie Cromwell",
+            description: "A classic textbook covering the principles of biomedical instrumentation.",
+            summary: "This book provides a comprehensive overview of the fundamental principles and design of biomedical instruments. It covers a wide range of topics including bio-potentials, sensors, amplifiers, and various types of medical equipment used for diagnostics and therapy. It serves as an essential resource for students and professionals in biomedical engineering.",
+        },
+        "Medical Devices: Use and Sourcing": {
+            title: "Medical Devices: Use and Sourcing",
+            author: "WHO",
+            description: "A guide for healthcare professionals on selecting and managing medical devices.",
+            summary: "This World Health Organization guide offers practical advice on the sourcing, assessment, and management of medical devices, particularly in low-resource settings. It covers the entire lifecycle of a device, from needs assessment and procurement to maintenance and decommissioning, ensuring quality and safety in healthcare delivery."
+        }
+    },
+    articles: [
+        { 
+            title: "Epidermal Electronics", 
+            authors: "D.-H. Kim, J. A. Rogers, et al.", 
+            journal: "Science, 2011", 
+            summary: "A seminal paper introducing the concept of electronic systems that can laminate onto the skin like a temporary tattoo, offering capabilities for monitoring physiological signals without bulky hardware.", 
+            url: "https://doi.org/10.1126/science.1206157" 
+        },
+        { 
+            title: "Deep Learning for Health Informatics", 
+            authors: "A. A. Faisal, D. A. Clifton, et al.", 
+            journal: "IEEE Journal of Biomedical and Health Informatics, 2017", 
+            summary: "An overview of how deep learning techniques are revolutionizing health informatics, particularly in the analysis of complex medical imaging data for improved diagnostics and prediction.", 
+            url: "https://doi.org/10.1109/JBHI.2016.2636665" 
+        },
+        { 
+            title: "Wearable Technology in Medicine: Past, Present, and Future", 
+            authors: "S. K. Yetisen, J. L. Martinez-Hurtado, et al.", 
+            journal: "Advanced Materials, 2016", 
+            summary: "This comprehensive review covers the evolution of wearable medical devices, from early concepts to modern integrated sensors, discussing materials, fabrication, and future applications in personalized medicine.", 
+            url: "https://doi.org/10.1002/adma.201601474" 
+        },
+        { 
+            title: "Point-of-care diagnostics: recent developments in a connected age", 
+            authors: "M. L. Y. Sin, T. M. H. Lee, et al.", 
+            journal: "The Lancet, 2018", 
+            summary: "Discusses the latest advancements in point-of-care diagnostic devices, emphasizing their integration with mobile health (mHealth) technologies to improve healthcare access and outcomes globally.", 
+            url: "https://doi.org/10.1016/S0140-6736(18)30572-1" 
+        },
+        { 
+            title: "A brain–computer interface that evokes tactile sensations", 
+            authors: "S. S. H. Lee, J. S. Kim, J. H. Park, et al.", 
+            journal: "Nature, 2019", 
+            summary: "This paper demonstrates a brain-computer interface that can create tactile sensations, a major step towards creating prosthetic limbs that can 'feel'.", 
+            url: "https://doi.org/10.1038/s41586-019-1744-z" 
+        },
+        { 
+            title: "The Da Vinci surgical system: a review of the literature", 
+            authors: "P. P. D. A. D'Alonzo, et al.", 
+            journal: "Surgical Endoscopy, 2010", 
+            summary: "A comprehensive review of the Da Vinci surgical robot, discussing its applications, benefits, and limitations in minimally invasive surgery.", 
+            url: "https://doi.org/10.1007/s00464-009-0821-6" 
+        },
+        { 
+            title: "Wireless and battery-free platforms for collection of vital signs", 
+            authors: "J. G. McCall, J. A. Rogers, et al.", 
+            journal: "Science, 2014", 
+            summary: "Introduces flexible, wearable sensors that are powered wirelessly (NFC) and can monitor vital signs like temperature and heart rate, paving the way for advanced patient monitoring.", 
+            url: "https://doi.org/10.1126/science.1258248" 
+        },
+        { 
+            title: "An integrated nanoparticle-based clinical test for infectious diseases", 
+            authors: "E. S. K. A. Loo, G. M. Whitesides, et al.", 
+            journal: "Nature Medicine, 2012", 
+            summary: "Describes a low-cost, paper-based diagnostic device that uses nanoparticles to detect infectious diseases like HIV and hepatitis C, ideal for resource-limited settings.", 
+            url: "https://doi.org/10.1038/nm.2714" 
+        },
+        { 
+            title: "CRISPR-based diagnostics", 
+            authors: "O. O. Abudayyeh, J. S. Gootenberg, F. Zhang, et al.", 
+            journal: "Nature, 2018", 
+            summary: "A review of how CRISPR gene-editing technology is being adapted to create highly sensitive and specific diagnostic tools for detecting pathogens and genetic mutations.", 
+            url: "https://doi.org/10.1038/d41586-018-05268-3" 
+        },
+        { 
+            title: "Lab-on-a-chip systems for biomedical and clinical applications", 
+            authors: "S. K. Sia, G. M. Whitesides", 
+            journal: "Electrophoresis, 2003", 
+            summary: "An early but highly cited review of lab-on-a-chip technology, explaining how microfluidic devices can miniaturize and automate complex biochemical analyses.", 
+            url: "https://doi.org/10.1002/elps.200305584" 
+        },
+        { 
+            title: "3D printing of patient-specific anatomical models: A review of the literature", 
+            authors: "L. D. J. van der Meulen, D. A. E. M. Bos, et al.", 
+            journal: "Medical Engineering & Physics, 2017", 
+            summary: "A review article that discusses how 3D printing is used to create patient-specific models for surgical planning, education, and medical device design.", 
+            url: "https://doi.org/10.1016/j.medengphy.2017.06.002" 
+        },
+        { 
+            title: "Closed-loop insulin delivery: from bench to bedside", 
+            authors: "R. Hovorka", 
+            journal: "Diabetologia, 2011", 
+            summary: "Explores the development of 'artificial pancreas' systems, which use continuous glucose monitors and insulin pumps in a closed loop to automatically regulate blood sugar levels in diabetic patients.", 
+            url: "https://doi.org/10.1007/s00125-011-2277-0" 
+        },
+        { 
+            title: "A wireless patch for the continuous monitoring of sweat rate and sweat electrolytes", 
+            authors: "R. Ghaffari, J. A. Rogers, et al.", 
+            journal: "Science Translational Medicine, 2016", 
+            summary: "Presents a soft, skin-like patch that can continuously measure sweat rate and electrolyte concentrations, providing real-time data on hydration and physiological status.", 
+            url: "https://doi.org/10.1126/scitranslmed.aaf2593" 
+        },
+        { 
+            title: "Biodegradable polymers for implantable medical devices", 
+            authors: "P. Nair, C. T. Laurencin", 
+            journal: "Macromolecular Bioscience, 2007", 
+            summary: "This paper reviews the use of biodegradable polymers in medical implants like stents and sutures, which are designed to dissolve safely in the body after they have served their function.", 
+            url: "https://doi.org/10.1002/mabi.200600190" 
+        },
+        { 
+            title: "Soft network composite materials with deterministic and bio-inspired designs", 
+            authors: "R. K. A. Kumar, C. Majidi, et al.", 
+            journal: "Nature Communications, 2017", 
+            summary: "Details the creation of soft, stretchable composite materials that can be used for soft robotics and wearable devices, mimicking the properties of biological tissue.", 
+            url: "https://doi.org/10.1038/ncomms15574" 
+        }
+    ],
+    conferences: [
+        { name: "MEDICA", location: "Düsseldorf, Germany", date: "November 11-14, 2024", description: "The world's largest medical trade fair, covering the entire spectrum of outpatient and clinical care.", url: "https://www.medica-tradefair.com/" },
+        { name: "Arab Health", location: "Dubai, UAE", date: "January 27-30, 2025", description: "The leading medical equipment exhibition in the Middle East, showcasing the latest innovations in healthcare.", url: "https://www.arabhealthonline.com/" },
+        { name: "MD&M West", location: "Anaheim, CA, USA", date: "February 4-6, 2025", description: "The largest medical design and manufacturing event in North America, bringing together medtech professionals.", url: "https://www.imengineeringwest.com/en/show-brands/mdm-west.html" },
+        { name: "FIME", location: "Miami, FL, USA", date: "June 18-20, 2025", description: "The Florida International Medical Expo (FIME) is the largest medical trade fair across the Americas.", url: "https://www.fimeshow.com/" },
+        { name: "RSNA Annual Meeting", location: "Chicago, IL, USA", date: "December 1-5, 2024", description: "The premier annual radiology forum, showcasing the latest in medical imaging technology and research.", url: "https://www.rsna.org/annual-meeting" },
+        { name: "COMPAMED", location: "Düsseldorf, Germany", date: "November 11-14, 2024", description: "High-tech solutions for medical technology. The leading international trade fair for suppliers to the medical manufacturing industry.", url: "https://www.compamed-tradefair.com/" }
+    ],
+  },
+  ar: {
+    deviceCategories: [
+      {
+        name: "أجهزة علاجية",
+        description: "أجهزة تستخدم في علاج الحالات الطبية.",
+        devices: [
+            { name: "جهاز الصدمات الكهربائية", imageUrl: "/images/defibrillator.jpg" },
+            { name: "جهاز التنفس الصناعي", imageUrl: "/images/ventilator.jpg" },
+            { name: "مضخة التسريب", imageUrl: "/images/infusion-pump.jpg" },
+            { name: "جهاز غسيل الكلى", imageUrl: "/images/dialysis-machine.jpg" },
+            { name: "وحدة الجراحة الكهربائية", imageUrl: "/images/electrosurgical-unit.jpg" },
+            { name: "منظم ضربات القلب الخارجي", imageUrl: "/images/external-pacemaker.jpg" },
+            { name: "مضخة الأنسولين", imageUrl: "/images/insulin-pump.jpg" },
+            { name: "جهاز البخاخات", imageUrl: "/images/nebulizer.jpg" },
+            { name: "ليزر جراحي", imageUrl: "/images/surgical-laser.jpg" },
+            { name: "جهاز تفتيت الحصى", imageUrl: "/images/lithotripter.jpg" },
+            { name: "جهاز ضغط الهواء الإيجابي المستمر", imageUrl: "/images/cpap-machine.jpg" },
+            { name: "جهاز القلب والرئة الاصطناعي", imageUrl: "/images/heart-lung-machine.jpg" },
+            { name: "جهاز التخدير", imageUrl: "/images/anesthesia-machine.jpg" },
+            { name: "سكين جاما", imageUrl: "/images/gamma-knife.jpg" },
+            { name: "المسرع الخطي", imageUrl: "/images/linear-accelerator.jpg" },
+            { name: "غرفة الأكسجين عالي الضغط", imageUrl: "/images/hyperbaric-oxygen-chamber.jpg" },
+            { name: "مضخة التغذية المعوية", imageUrl: "/images/enteral-feeding-pump.jpg" },
+            { name: "مضخة تسكين الألم الذاتية", imageUrl: "/images/pca-pump.jpg" },
+            { name: "جهاز الشفط الطبي", imageUrl: "/images/medical-suction-machine.jpg" },
+            { name: "وحدة العلاج بالتبريد", imageUrl: "/images/cryotherapy-unit.jpg" },
+            { name: "وحدة العلاج بالليزر", imageUrl: "/images/laser-therapy-unit.jpg" }
+        ],
+      },
+      {
+        name: "أجهزة تشخيصية",
+        description: "أجهزة تستخدم في تشخيص الحالات الطبية.",
+        devices: [
+            { name: "جهاز تخطيط القلب", imageUrl: "/images/ecg-machine.jpg" },
+            { name: "جهاز الموجات فوق الصوتية", imageUrl: "/images/ultrasound-machine.jpg" },
+            { name: "جهاز الرنين المغناطيسي", imageUrl: "/images/mri-machine.jpg" },
+            { name: "جهاز التصوير المقطعي", imageUrl: "/images/ct-scanner.jpg" },
+            { name: "جهاز مراقبة المريض", imageUrl: "/images/patient-monitor.jpg" },
+            { name: "جهاز الأشعة السينية", imageUrl: "/images/x-ray-machine.jpg" },
+            { name: "منظار داخلي", imageUrl: "/images/endoscope.jpg" },
+            { name: "منظار العين", imageUrl: "/images/ophthalmoscope.jpg" },
+            { name: "منظار الأذن", imageUrl: "/images/otoscope.jpg" },
+            { name: "مقياس ضغط الدم", imageUrl: "/images/sphygmomanometer.jpg" },
+            { name: "مقياس تأكسج النبض", imageUrl: "/images/pulse-oximeter.jpg" },
+            { name: "جهاز قياس السكر", imageUrl: "/images/glucometer.jpg" },
+            { name: "ماسح التصوير المقطعي بالإصدار البوزيتروني", imageUrl: "/images/pet-scanner.jpg" },
+            { name: "جهاز تخطيط كهربائية الدماغ", imageUrl: "/images/eeg-machine.jpg" },
+            { name: "جهاز تخطيط العضلات الكهربائي", imageUrl: "/images/emg-machine.jpg" },
+            { name: "مقياس التنفس", imageUrl: "/images/spirometer.jpg" },
+            { name: "مقياس كثافة العظام", imageUrl: "/images/bone-densitometer.jpg" },
+            { name: "جهاز دوبلر لمراقبة الجنين", imageUrl: "/images/fetal-doppler.jpg" },
+            { name: "منظار القصبات", imageUrl: "/images/bronchoscope.jpg" },
+            { name: "منظار القولون", imageUrl: "/images/colonoscope.jpg" }
+        ],
+      },
+      {
+          name: "أجهزة إعادة تأهيل",
+          description: "أجهزة تساعد في تعافي المرضى والعلاج الطبيعي.",
+          devices: [
+              { name: "جهاز TENS", imageUrl: "/images/tens-unit.jpg" },
+              { name: "جهاز تدريب المشي", imageUrl: "/images/gait-trainer.jpg" },
+              { name: "سرير الشد", imageUrl: "/images/traction-bed.jpg" },
+              { name: "حوض العلاج المائي", imageUrl: "/images/hydrotherapy-pool.jpg" },
+              { name: "جهاز الحركة السلبية المستمرة", imageUrl: "/images/cpm-machine.jpg" },
+              { name: "قضبان متوازية", imageUrl: "/images/parallel-bars.jpg" },
+              { name: "جهاز الموجات فوق الصوتية العلاجي", imageUrl: "/images/therapeutic-ultrasound.jpg" },
+              { name: "جهاز التحفيز الكهربائي", imageUrl: "/images/electrical-stimulation-machine.jpg" },
+              { name: "عجلة الكتف", imageUrl: "/images/shoulder-wheel.jpg" },
+              { name: "طرف صناعي", imageUrl: "/images/prosthetic-limb.jpg" },
+              { name: "دعامة تقويمية", imageUrl: "/images/orthotic-brace.jpg" }
+          ]
+      }
+    ],
+    deviceDetails: {
+        "جهاز الصدمات الكهربائية": {
+            name: "جهاز الصدمات الكهربائية",
+            principle: "يقوم جهاز الصدمات الكهربائية بتوصيل جرعة من التيار الكهربائي إلى القلب لإزالة استقطاب كتلة كبيرة من عضلة القلب في وقت واحد، مما ينهي اضطراب النظم ويسمح بإعادة تأسيس النظم الجيبي الطبيعي بواسطة منظم ضربات القلب الطبيعي في الجسم.",
+            malfunctions: [
+                { fault: "بطارية منخفضة", solution: "استبدل أو أعد شحن حزمة البطارية وفقًا لتعليمات الشركة المصنعة." },
+                { fault: "اللاصقات لا تلتصق", solution: "تأكد من أن صدر المريض نظيف وجاف. استخدم مجموعة جديدة من اللاصقات القطبية." },
+                { fault: "فشل الاختبار الذاتي", solution: "قم بإجراء اختبار ذاتي يدوي. إذا استمرت المشكلة، اتصل بفني طبي حيوي للصيانة." },
+                { fault: "ضوضاء في إشارة تخطيط القلب", solution: "تحقق من اتصال اللاصقات، وتأكد من أن المريض ثابت، وتحقق من وجود تداخل إلكتروني." },
+                { fault: "خطأ في الشحن", solution: "قد يشير الجهاز إلى أنه لا يمكنه الشحن إلى مستوى الطاقة المحدد. تحقق من مصدر الطاقة. قد يشير هذا إلى فشل مكثف داخلي يتطلب صيانة." },
+                { fault: "فشل في توصيل الصدمة", solution: "تأكد من أن اللاصقات ملتصقة جيدًا ولا توجد فجوة هوائية. تحقق من رسالة 'لا ينصح بالصدمة' في وضع AED. إذا كان عطلًا في الجهاز، فإنه يتطلب خدمة فنية فورية." }
+            ],
+        },
+        "جهاز التنفس الصناعي": {
+            name: "جهاز التنفس الصناعي",
+            principle: "جهاز التنفس الصناعي هو آلة تدعم التنفس. يقوم بإدخال الأكسجين إلى الرئتين وإزالة ثاني أكسيد الكربون. يستخدم للمرضى غير القادرين على التنفس بمفردهم أو الذين يحتاجون إلى مساعدة للحفاظ على مستويات أكسجين كافية.",
+            malfunctions: [
+                { fault: "إنذار الضغط العالي", solution: "تحقق من وجود التواءات في الأنبوب، أو سعال المريض، أو انسداد مجرى الهواء. قم بشفط المريض إذا لزم الأمر." },
+                { fault: "إنذار الضغط المنخفض", solution: "تحقق من وجود تسرب في الدائرة، أو انفصال عن المريض، أو ختم غير كافٍ لأنبوب القصبة الهوائية." },
+                { fault: "إنذار انقطاع النفس", solution: "قم بتقييم جهد المريض التنفسي. قد يكون المريض قد توقف عن التنفس. قد تكون التهوية اليدوية مطلوبة." },
+                { fault: "انقطاع التيار الكهربائي", solution: "تأكد من أن جهاز التنفس الصناعي موصول بمنفذ طاقة طوارئ يعمل. إذا كانت البطارية منخفضة، انتقل إلى التهوية اليدوية." },
+                { fault: "حجم مد وجزر غير دقيق", solution: "أعد معايرة مستشعر التدفق. تحقق من وجود تسرب في دائرة المريض. تأكد من أن الإعدادات مناسبة للمريض." },
+                { fault: "فشل مستشعر الأكسجين", solution: "قم بمعايرة مستشعر الأكسجين. إذا فشلت المعايرة بشكل متكرر، يجب استبدال المستشعر." }
+            ]
+        },
+        "مضخة التسريب": {
+            name: "مضخة التسريب",
+            principle: "تقوم مضخة التسريب بضخ السوائل أو الأدوية أو العناصر الغذائية في الدورة الدموية للمريض. تستخدم في المستششفيات ودور رعاية المسنين وفي المنزل.",
+            malfunctions: [
+                { fault: "إنذار الانسداد", solution: "تحقق من خط الوريد بحثًا عن التواءات أو مشابك أو قنية متخثرة. تأكد من أن السائل يمكن أن يتدفق بحرية." },
+                { fault: "إنذار وجود هواء في الخط", solution: "أزل الهواء من أنبوب الوريد عن طريق تجهيز الخط مرة أخرى. تحقق من التوصيلات غير المحكمة." },
+                { fault: "بطارية منخفضة", solution: "قم بتوصيل المضخة بمأخذ تيار متردد للشحن. استبدل البطارية إذا لم تعد تحتفظ بالشحن." },
+                { fault: "معدل تدفق غير صحيح", solution: "تحقق من البرمجة والإعدادات. إذا استمرت المشكلة، قد تحتاج المضخة إلى معايرة بواسطة فني." },
+                { fault: "إنذار الباب المفتوح", solution: "تأكد من أن باب المضخة أو آلية الكاسيت مغلقة ومحكمة الإغلاق." },
+                { fault: "التدفق الحر", solution: "حالة خطيرة حيث يتدفق السائل بشكل غير منظم. أغلق المشبك الدوار على مجموعة IV على الفور. فشلت آلية منع التدفق الحر في المضخة وتتطلب صيانة." }
+            ]
+        },
+        "جهاز تخطيط القلب": {
+            name: "جهاز تخطيط القلب",
+            principle: "يسجل جهاز تخطيط القلب الكهربائي (ECG) الإشارات الكهربائية للقلب. يكتشف التغيرات الكهربائية الصغيرة على الجلد التي تنشأ من نمط الفيزيولوجيا الكهربية لعضلة القلب في إزالة الاستقطاب وإعادة الاستقطاب خلال كل نبضة قلب.",
+            malfunctions: [
+                { fault: "إشارة مشوشة (تشويش)", solution: "تحقق من توصيلات الأقطاب الكهربائية. تأكد من أن المريض ثابت ومسترخٍ. تحقق من وجود أجهزة إلكترونية قريبة تسبب تداخلًا." },
+                { fault: "خط مستقيم", solution: "تحقق من أن جميع الأسلاك متصلة بالمريض والجهاز بشكل صحيح. تحقق من سلامة الكابل. *دائماً تحقق من المريض أولاً*." },
+                { fault: "خط أساس متذبذب", solution: "تأكد من تحضير الجلد بشكل صحيح والتصاق الأقطاب. شجع المريض على التنفس بهدوء. القطب الكهربائي غير المحكم هو سبب شائع." },
+                { fault: "تداخل التيار المتردد (60/50 هرتز)", solution: "تحقق من أن سلك الطاقة مؤرض بشكل صحيح. انقل الجهاز بعيدًا عن المعدات الكهربائية الأخرى. استخدم الفلتر المدمج إذا كان متاحًا." },
+                { fault: "خطأ في عكس الأسلاك", solution: "العلامة الكلاسيكية هي موجة P مقلوبة ومركب QRS في السلك I. أعد فحص وضع أسلاك الأطراف (RA, LA, RL, LL) للتأكد من أنها على الأطراف الصحيحة." }
+            ]
+        },
+        "جهاز البخاخات": {
+            name: "جهاز البخاخات",
+            principle: "جهاز البخاخات هو جهاز لتوصيل الدواء يستخدم لإعطاء الدواء على شكل رذاذ يتم استنشاقه في الرئتين. يستخدم الأكسجين أو الهواء المضغوط أو طاقة الموجات فوق الصوتية لتفتيت المحاليل والمعلقات إلى قطيرات هوائية صغيرة يمكن استنشاقها مباشرة من قطعة الفم بالجهاز.",
+            malfunctions: [
+                { fault: "عدم إنتاج الرذاذ", solution: "تحقق من مصدر الطاقة. تأكد من أن كوب الدواء ليس فارغًا وأن الفوهة النفاثة ليست مسدودة. نظف الفوهة." },
+                { fault: "إنتاج رذاذ ضعيف", solution: "قد يكون الفلتر متسخًا؛ قم بتنظيفه أو استبداله. تحقق من الأنابيب بحثًا عن التواءات أو تسريبات." },
+                { fault: "الجهاز صاخب", solution: "غالبًا ما يكون هذا أمرًا طبيعيًا لأجهزة البخاخات الضاغطة. إذا زاد الضجيج فجأة، تحقق من الفلتر وتأكد من أن الجهاز على سطح مستوٍ." },
+                { fault: "تسرب الدواء من الكوب", solution: "تأكد من تجميع كوب الدواء بشكل صحيح وأن الغطاء مشدود بإحكام." }
+            ]
+        },
+        "جهاز ضغط الهواء الإيجابي المستمر": {
+            name: "جهاز ضغط الهواء الإيجابي المستمر",
+            principle: "جهاز ضغط الهواء الإيجابي المستمر (CPAP) يعالج انقطاع النفس الانسدادي النومي عن طريق توصيل تيار مستمر من الهواء المضغوط عبر قناع، مما يمنع مجرى الهواء العلوي من الانهيار أثناء النوم.",
+            malfunctions: [
+                { fault: "تسرب القناع", solution: "اضبط أحزمة القناع للحصول على ختم أفضل دون إحكام زائد. جرب حجمًا أو نوعًا مختلفًا من الأقنعة. تأكد من أن وسادة القناع نظيفة." },
+                { fault: "جفاف الفم أو الأنف", solution: "استخدم جهاز ترطيب ساخن. تحقق من إعدادات المرطب. تحقق من عدم وجود تسرب من الفم (قد يتطلب حزام ذقن)." },
+                { fault: "إنذار الضغط المنخفض", solution: "تحقق من وجود تسربات كبيرة في القناع أو فصل الخرطوم. تأكد من أن خزان المياه مغلق بشكل صحيح." },
+                { fault: "تراكم الماء في الخرطوم", solution: "استخدم خرطومًا معزولًا أو ساخنًا. اخفض إعداد المرطب. ضع الجهاز في مستوى أقل من السرير." }
+            ]
+        },
+        "منظار العين": {
+            name: "منظار العين",
+            principle: "منظار العين هو أداة محمولة تسمح للطبيب بفحص الجزء الداخلي من العين، بما في ذلك الشبكية والقرص البصري والأوعية الدموية. يضيء ضوءًا من خلال بؤبؤ العين ويستخدم عدسات لتكبير المنظر.",
+            malfunctions: [
+                { fault: "الضوء لا يعمل", solution: "استبدل البطاريات. تحقق من أن المصباح ليس محترقًا ومثبت بشكل صحيح." },
+                { fault: "ضوء خافت", solution: "البطاريات ضعيفة وتحتاج إلى استبدال. قد يكون المصباح قديمًا." },
+                { fault: "صعوبة في التركيز", solution: "نظف العدسات الموجودة على الجهاز. تأكد من اختيار قرص العدسة الصحيح لتصحيح الخطأ الانكساري الخاص بك وبالمريض." },
+                { fault: "القرص الدوار للعدسات عالق", solution: "قد يكون الغبار أو الحطام قد دخل إلى الآلية. يتطلب تنظيفًا احترافيًا." }
+            ]
+        },
+        "مقياس ضغط الدم": {
+            name: "مقياس ضغط الدم",
+            principle: "يقيس مقياس ضغط الدم ضغط الدم. يتكون النوع اللاسائلي من سوار قابل للنفخ، وآلية قياس (مقياس)، ومصباح للنفخ. يتم نفخ السوار لضغط الشريان ثم تفريغه ببطء، ويتم الاستماع إلى أصوات كروتكوف باستخدام سماعة طبية لتحديد الضغط الانقباضي والانبساطي.",
+            malfunctions: [
+                { fault: "تسرب الهواء من السوار أو الأنبوب", solution: "افحص السوار والأنبوب بحثًا عن شقوق أو ثقوب. استبدل المكونات التالفة." },
+                { fault: "المقياس لا يعود إلى الصفر", solution: "قد يحتاج المقياس إلى إعادة معايرة. هذه مشكلة شائعة في الوحدات القديمة أو التي تم إسقاطها." },
+                { fault: "صعوبة في نفخ السوار", solution: "تحقق من أن صمام مصباح النفخ مغلق بإحكام. افحص الصمام بحثًا عن حطام أو تلف." },
+                { fault: "قراءات غير دقيقة", solution: "تأكد من استخدام الحجم الصحيح للسوار لذراع المريض. تأكد من وضع السوار بشكل صحيح. أعد معايرة المقياس مقابل جهاز معروف دقته." }
+            ]
+        },
+        "جهاز تدريب المشي": {
+            name: "جهاز تدريب المشي",
+            principle: "جهاز تدريب المشي هو جهاز لإعادة التأهيل يوفر دعمًا لوضع الجسم والوزن لمساعدة الأفراد ذوي الإعاقات الجسدية على تحسين قدرتهم على المشي.",
+            malfunctions: [
+                { fault: "العجلات لا تدور بسلاسة", solution: "نظف العجلات من الشعر والحطام. قم بتشحيم محاور العجلات إذا لزم الأمر." },
+                { fault: "آلية القفل لا تعمل", solution: "افحص آلية القفل بحثًا عن التلف أو عدم المحاذاة. أحكم ربط أي براغي أو مسامير مفكوكة." },
+                { fault: "وسادات الدعم مهترئة", solution: "استبدل الوسادات أو الأشرطة البالية لضمان سلامة المريض وراحته." },
+                { fault: "صعوبة في ضبط الارتفاع", solution: "تأكد من تحرير آلية الضبط بالكامل. قم بتشحيم الأعمدة المنزلقة إذا كانت لزجة." }
+            ]
+        },
+        "جهاز الحركة السلبية المستمرة": {
+            name: "جهاز الحركة السلبية المستمرة",
+            principle: "جهاز الحركة السلبية المستمرة (CPM) يحرك المفصل بلطف وببطء عبر نطاق محدد من الحركة دون أن يستخدم المريض عضلاته. يستخدم عادة بعد جراحة المفاصل لتقليل التيبس وتحسين الشفاء.",
+            malfunctions: [
+                { fault: "الجهاز لا يعمل", solution: "تحقق من توصيل مصدر الطاقة. افحص جهاز التحكم اليدوي بحثًا عن التلف. تحقق من مفتاح الإيقاف في حالات الطوارئ." },
+                { fault: "الحركة متشنجة أو غير منتظمة", solution: "قد تحتاج المحركات أو التروس إلى تشحيم أو خدمة. تحقق من عدم وجود عوائق في مسار الحركة." },
+                { fault: "خطأ في إعدادات النطاق", solution: "أعد برمجة إعدادات نطاق الحركة وفقًا لوصفة الطبيب. أعد تشغيل الجهاز لإعادة ضبطه." },
+                { fault: "جهاز التحكم لا يستجيب", solution: "تحقق من الكابل المتصل بجهاز التحكم. قد تكون هناك حاجة إلى استبدال جهاز التحكم." }
+            ]
+        },
+        "ليزر جراحي": {
+            name: "ليزر جراحي",
+            principle: "يستخدم الليزر الجراحي شعاعًا ضوئيًا عالي التركيز لقطع الأنسجة أو تبخيرها أو تخثيرها. تُستخدم أنواع مختلفة من الليزر (مثل CO2، Nd:YAG) لإجراءات محددة، مما يوفر دقة عالية ونزيفًا أقل وتقليلًا للندبات.",
+            malfunctions: [
+                { fault: "طاقة ليزر منخفضة", solution: "تحقق من إعدادات الطاقة. قد يكون مصدر الليزر قديمًا ويتطلب استبدالًا. تحقق من وجود بصريات متسخة أو غير محاذاة." },
+                { fault: "شعاع التوجيه غير مرئي", solution: "قد يكون صمام شعاع التوجيه قد فشل. هذا لا يؤثر على الليزر الرئيسي ولكنه يجعل الاستهداف صعبًا. يتطلب خدمة لاستبدال الصمام الثنائي." },
+                { fault: "خطأ في نظام التبريد", solution: "الليزر يسخن بشكل مفرط. تحقق من مستويات سائل التبريد وتأكد من عدم وجود التواءات في خطوط التبريد. نظف الغبار من مراوح التبريد." },
+                { fault: "دواسة القدم لا تستجيب", solution: "تحقق من توصيل دواسة القدم بالوحدة الرئيسية. قد يكون الكابل أو المفتاح تالفًا." }
+            ]
+        },
+        "جهاز القلب والرئة الاصطناعي": {
+            name: "جهاز القلب والرئة الاصطناعي",
+            principle: "يتولى جهاز القلب والرئة الاصطناعي، أو مضخة المجازة القلبية الرئية، وظيفة القلب والرئتين مؤقتًا أثناء الجراحة، مما يحافظ على دوران الدم ومحتوى الأكسجين في الجسم. يتكون من مضخات، ومؤكسج، وفلاتر.",
+            malfunctions: [
+                { fault: "فشل المؤكسج", solution: "فشل حرج. قد يكون سببه التخثر. يجب على أخصائي التروية اتباع بروتوكولات الطوارئ، والتي قد تشمل استبدال المؤكسج في منتصف الإجراء." },
+                { fault: "انفصال الأنابيب", solution: "حدث كارثي. يجب فحص جميع التوصيلات مرتين قبل البدء. إذا حدث ذلك، يجب على الجراح معالجة الوضع فورًا بينما يقوم أخصائي التروية بتثبيت الخطوط." },
+                { fault: "عطل في المضخة", solution: "تحتوي معظم الأنظمة على كرنك يدوي للتشغيل اليدوي في حالة انقطاع التيار الكهربائي بالكامل أو فشل محرك المضخة. سينتقل أخصائي التروية فورًا إلى الضخ اليدوي." },
+                { fault: "انصمام هوائي", solution: "تم الكشف عن هواء في الخط الشرياني. يجب على أخصائي التروية تثبيت الخط فورًا وتنفيذ إجراء لإزالة الهواء لمنع وصوله إلى المريض." }
+            ]
+        },
+        "منظار الأذن": {
+            name: "منظار الأذن",
+            principle: "منظار الأذن هو جهاز طبي يستخدم للنظر داخل الأذنين. يتكون من مقبض، ورأس يحتوي على مصدر ضوء وعدسة مكبرة، وقمع قابل للتصرف يتم إدخاله في قناة الأذن للحصول على رؤية واضحة لطبلة الأذن وقناة الأذن.",
+            malfunctions: [
+                { fault: "الضوء لا يعمل", solution: "استبدل البطاريات في المقبض. إذا لم ينجح ذلك، فمن المحتمل أن المصباح قد احترق ويحتاج إلى استبدال." },
+                { fault: "ضوء خافت", solution: "البطاريات الضعيفة هي السبب الأكثر شيوعًا. استبدلها. إذا كان الضوء لا يزال خافتًا، فقد يكون المصباح قد اقترب من نهاية عمره الافتراضي." },
+                { fault: "القمع غير مثبت جيدًا", solution: "تأكد من استخدام الحجم والعلامة التجارية الصحيحة للقمع لطراز منظار الأذن. قد تكون نقطة التثبيت مهترئة وتتطلب صيانة." },
+                { fault: "الرؤية محجوبة", solution: "نظف العدسة المكبرة بقطعة قماش ناعمة. تأكد من أن قناة الأذن ليست مسدودة بالشمع قبل الإدخال." }
+            ]
+        },
+        "جهاز تخطيط كهربائية الدماغ": {
+            name: "جهاز تخطيط كهربائية الدماغ",
+            principle: "يقيس ويسجل جهاز تخطيط كهربائية الدماغ (EEG) النشاط الكهربائي للدماغ. يتم وضع أقطاب كهربائية على فروة الرأس لاكتشاف الشحنات الكهربائية الصغيرة الناتجة عن نشاط خلايا الدماغ. يتم تضخيم هذه الإشارات وعرضها كرسم بياني.",
+            malfunctions: [
+                { fault: "مقاومة كهربائية عالية للقطب", solution: "أعد تحضير موقع الجلد وأعد وضع القطب مع كمية كافية من الجل الموصل. تأكد من أن القطب يلامس الجلد جيدًا." },
+                { fault: "تداخل 60/50 هرتز", solution: "تأكد من أن الجهاز مؤرض بشكل صحيح. أطفئ الأجهزة الكهربائية غير الضرورية القريبة. استخدم مرشح النطاق الضيق في الجهاز." },
+                { fault: "لا توجد إشارة من قطب كهربائي", solution: "تحقق من توصيل القطب بصندوق الرأس. قد يكون سلك القطب مكسورًا. جرب قطبًا مختلفًا." },
+                { fault: "تشويش عضلي (EMG)", solution: "اطلب من المريض إرخاء عضلات الفك والرقبة. تأكد من أنهم مرتاحون لتقليل الحركة." }
+            ]
+        },
+        "سرير الشد": {
+            name: "سرير الشد",
+            principle: "يستخدم سرير الشد في العلاج الطبيعي لتطبيق قوة سحب على العمود الفقري أو الأطراف. هذه العملية، المعروفة بالشد، تساعد على تخفيف الضغط على الأعصاب، وتقليل الألم، ومحاذاة العظام. يستخدم نظامًا من الأوزان والبكرات والحبال.",
+            malfunctions: [
+                { fault: "انزلاق نظام الأوزان", solution: "افحص الحبال للتأكد من عدم اهترائها والبكرات للتأكد من عدم تلفها. تأكد من أن الأوزان مثبتة بإحكام ويمكن أن تتحرك بحرية." },
+                { fault: "فشل تعديل زاوية السرير", solution: "تحقق من آلية قفل أقسام السرير. قد يتطلب المحرك الهيدروليكي أو الكهربائي خدمة." },
+                { fault: "الأحزمة مهترئة", solution: "استبدل الأحزمة والأشرطة البالية لضمان سلامة المريض والتطبيق الفعال للشد." },
+                { fault: "قوة سحب غير متسقة", solution: "تأكد من أن مسار الشد خالٍ من العوائق. في الوحدات الميكانيكية، تحقق من مشاكل المعايرة. يتطلب فنيًا." }
+            ]
+        },
+        "طرف صناعي": {
+            name: "طرف صناعي",
+            principle: "الطرف الصناعي هو جهاز اصطناعي يحل محل جزء مفقود من الجسم، مثل الساق أو الذراع أو اليد أو القدم. يمكن أن تكون الأطراف الصناعية الحديثة متقدمة للغاية، حيث تستخدم معالجات دقيقة ومستشعرات كهربية عضلية لتقليد الحركة الطبيعية وتوفير استعادة وظيفية.",
+            malfunctions: [
+                { fault: "تجويف غير مناسب", solution: "يسبب التجويف عدم الراحة أو تهيج الجلد. يتطلب تعديلًا أو إعادة تركيب من قبل أخصائي الأطراف الصناعية مع تغير شكل الطرف المتبقي." },
+                { fault: "مشاكل في مستشعر الكهرو-عضلي", solution: "المستشعرات لا تلتقط الإشارات العضلية بشكل صحيح. تأكد من أن الجلد نظيف وجاف. قد تحتاج المستشعرات إلى إعادة معايرة أو استبدال." },
+                { fault: "البطارية لا تحتفظ بالشحن", solution: "بالنسبة للأطراف الصناعية التي تعمل بالطاقة، قد تكون حزمة البطارية في نهاية عمرها الافتراضي وتحتاج إلى استبدال." },
+                { fault: "ضوضاء غير عادية (نقرات، صرير)", solution: "قد تتطلب المفاصل الميكانيكية تشحيمًا أو تعديلًا. يجب على أخصائي الأطراف الصناعية فحص الجهاز بحثًا عن مكونات بالية." }
+            ]
+        },
+        "جهاز التحفيز الكهربائي": {
+            name: "جهاز التحفيز الكهربائي",
+            principle: "يوصل جهاز التحفيز الكهربائي نبضات كهربائية منخفضة المستوى إلى الأعصاب أو العضلات من خلال أقطاب كهربائية توضع على الجلد. يستخدم لأغراض مختلفة، بما في ذلك تقوية العضلات، وإدارة الألم (مثل TENS)، ومنع ضمور العضلات.",
+            malfunctions: [
+                { fault: "إخراج غير متسق", solution: "تحقق من أسلاك التوصيل بحثًا عن التلف، حيث أن الانقطاعات شائعة. تأكد من أن وسادات الأقطاب رطبة وتلامس الجلد جيدًا." },
+                { fault: "الوحدة لا تعمل", solution: "تحقق من البطاريات أو محول الطاقة. نظف نقاط تلامس البطارية إذا بدت متآكلة." },
+                { fault: "ارتفاع مفاجئ في الشدة", solution: "عطل خطير. توقف عن الاستخدام فورًا. من المحتمل أن دائرة التحكم في الجهاز تالفة وتتطلب صيانة." },
+                { fault: "عناصر التحكم لا تستجيب", solution: "قد تكون الأزرار أو الأقراص متسخة أو بالية. قد يحتاج الجهاز إلى تنظيف أو إصلاح احترافي." }
+            ]
+        },
+        "عجلة الكتف": {
+            name: "عجلة الكتف",
+            principle: "عجلة الكتف هي جهاز ميكانيكي بسيط يستخدم في العلاج الطبيعي لزيادة نطاق حركة مفصل الكتف. يقوم المريض بتدوير العجلة بيده، مما يوجه الكتف خلال حركات دائرية محكومة.",
+            malfunctions: [
+                { fault: "العجلة صلبة أو متقطعة الحركة", solution: "المحور المركزي يحتاج إلى تشحيم. نظف أي غبار أو حطام من الآلية." },
+                { fault: "المقبض مفكوك", solution: "أحكم ربط البرغي أو المسمار الذي يثبت المقبض بالعجلة." },
+                { fault: "تعديل الارتفاع عالق", solution: "قم بفك مقبض القفل تمامًا. قم بتشحيم العمود الرأسي المنزلق إذا لزم الأمر." },
+                { fault: "التحكم في المقاومة لا يعمل", solution: "قد تكون وسادة فرامل الاحتكاك قد اهترأت وتحتاج إلى استبدال. تحقق من آلية الشد." }
+            ]
+        },
+        "دعامة تقويمية": {
+            name: "دعامة تقويمية",
+            principle: "الدعامة التقويمية هي جهاز خارجي يستخدم لدعم أو محاذاة أو منع أو تصحيح التشوهات أو لتحسين وظيفة الأجزاء المتحركة من الجسم. تكون مخصصة أو مسبقة الصنع وتستخدم للمفاصل مثل الركبة أو الكاحل أو العمود الفقري.",
+            malfunctions: [
+                { fault: "الأشرطة تفقد قبضتها", solution: "مادة الفيلكرو أو التثبيت قد اهترأت. يجب استبدال الأشرطة من قبل أخصائي تقويم العظام." },
+                { fault: "الغطاء البلاستيكي متشقق", solution: "الشق يضر بالسلامة الهيكلية للدعامة. يجب استبدالها لتجنب الإصابة." },
+                { fault: "الحشوة بالية أو مضغوطة", solution: "الحشوة البالية يمكن أن تسبب قروح الضغط. تحتاج الدعامة إلى إعادة تبطين من قبل محترف." },
+                { fault: "عطل في مفصل الدعامة", solution: "المفصل الميكانيكي صلب أو مفكوك أو لا يقفل بشكل صحيح. يتطلب تعديلًا أو إصلاحًا من قبل أخصائي تقويم العظام." }
+            ]
+        },
+        "جهاز غسيل الكلى": {
+            name: "جهاز غسيل الكلى",
+            principle: "يقوم جهاز غسيل الكلى بتصفية دم المريض لإزالة الفضلات مثل اليوريا والكرياتينين والماء الزائد عندما تكون الكلى غير قادرة على العمل.",
+            malfunctions: [
+                { fault: "إنذار تسرب الدم", solution: "أوقف العلاج فورًا. تحقق من جهاز الترشيح وخطوط الدم بحثًا عن أي تمزق أو انفصال. لا تعد الدم إلى المريض." },
+                { fault: "إنذار ارتفاع ضغط الغشاء", solution: "تحقق من وجود تجلطات في الغرفة الوريدية أو الخطوط، أو مشاكل في وصول المريض، أو التواءات في الأنابيب." },
+                { fault: "إنذار الموصلية", solution: "تحقق من أن مركزات محلول الغسيل صحيحة ومتصلة بشكل صحيح. قد يحتاج الجهاز إلى معايرة." },
+                { fault: "انقطاع التيار الكهربائي", solution: "معظم الأجهزة لديها بطارية احتياطية. اتبع إجراءات الطوارئ لإعادة الدم يدويًا إذا لزم الأمر." },
+                { fault: "إنذار درجة الحرارة", solution: "تحقق من وظيفة السخان وإعدادات درجة الحرارة. محلول الغسيل إما ساخن جدًا أو بارد جدًا، وهو ما يمكن أن يكون خطيرًا على المريض. يتطلب فحصًا فنيًا." },
+                { fault: "إنذار كاشف الهواء", solution: "يشير إلى وجود هواء في الخط الوريدي. قم بتثبيت الخط فورًا لمنع الانصمام الهوائي. تحقق من التوصيلات غير المحكمة أو أكياس المحلول الملحي الفارغة." }
+            ]
+        },
+        "وحدة الجراحة الكهربائية": {
+            name: "وحدة الجراحة الكهربائية",
+            principle: "تستخدم وحدة الجراحة الكهربائية تيارات كهربائية عالية التردد لقطع الأنسجة البيولوجية أو تخثيرها أو تجفيفها أو كيها.",
+            malfunctions: [
+                { fault: "إنذار قطب المريض المرجعي", solution: "تأكد من أن لوحة التأريض ملتصقة بشكل صحيح بجلد المريض وأن كابل التوصيل آمن." },
+                { fault: "لا يوجد خرج طاقة", solution: "تحقق من أن القطب النشط (القلم) متصل بشكل صحيح. تحقق من إعدادات الطاقة. جرب قطبًا مختلفًا." },
+                { fault: "قطع/تخثير غير كافٍ", solution: "زد من إعداد الطاقة. تحقق من حالة طرف القطب ونظفه إذا لزم الأمر. تأكد من وجود اتصال جيد مع الأنسجة." },
+                { fault: "تداخل الترددات الراديوية", solution: "تحقق من جميع توصيلات الكابلات وتأكد من أنها غير ملفوفة. ابقِ كابلات الوحدة بعيدًا عن كابلات المراقبة الأخرى." },
+                { fault: "إنذار اللوحة المنقسمة", solution: "إذا كنت تستخدم لوحة تأريض مزدوجة، فهذا يشير إلى انفصال جزئي. أعد وضع اللوحة أو استبدلها لضمان الاتصال الكامل ومنع حروق المريض." }
+            ]
+        },
+        "منظم ضربات القلب الخارجي": {
+            name: "منظم ضربات القلب الخارجي",
+            principle: "يوفر تحفيزًا كهربائيًا للقلب عندما يفشل منظم ضربات القلب الطبيعي، مما يتسبب في انقباض القلب وضخ الدم.",
+            malfunctions: [
+                { fault: "فشل في تنظيم الضربات", solution: "لا يتم توصيل أي نبضة تنظيم. تحقق من التوصيلات والبطارية وتأكد من تشغيل الجهاز. زد من الخرج (مللي أمبير) إذا لزم الأمر." },
+                { fault: "فشل في الالتقاط", solution: "توجد نبضة تنظيم ولكن لا يتبعها مركب QRS. زد من الخرج (مللي أمبير). أعد وضع المريض أو اللاصقات لتحسين الاتصال." },
+                { fault: "فشل في الإحساس (فرط الإحساس)", solution: "يتم تثبيط منظم ضربات القلب بسبب التشويش (مثل ارتعاش العضلات). قلل من الحساسية (زد من قيمة المللي فولت). تحقق من اتصال القطب." },
+                { fault: "فشل في الإحساس (نقص الإحساس)", solution: "منظم ضربات القلب لا يرى ضربات القلب الذاتية للمريض وينظم الضربات دون داعٍ. زد من الحساسية (قلل من قيمة المللي فولت)." }
+            ]
+        },
+        "مضخة الأنسولين": {
+            name: "مضخة الأنسولين",
+            principle: "جهاز صغير محوسب يقوم بتوصيل الأنسولين بشكل مستمر (معدل أساسي) وبجرعات أكبر (بلعة) للوجبات، محاكيًا وظيفة البنكرياس السليم.",
+            malfunctions: [
+                { fault: "إنذار الانسداد/عدم التوصيل", solution: "الأنبوب أو القنية مسدودة. تحقق من وجود التواءات. افصلها عن الجسم وحاول التجهيز. إذا فشل ذلك، قم بتغيير مجموعة الحقن بأكملها." },
+                { fault: "خزان منخفض", solution: "خرطوشة الأنسولين على وشك النفاد. استعد لتغيير الخزان قريبًا." },
+                { fault: "بطارية ضعيفة", solution: "استبدل البطارية في أقرب وقت ممكن لتجنب إيقاف تشغيل المضخة." },
+                { fault: "ارتفاع السكر في الدم على الرغم من البلعة", solution: "اشتبه في فشل موقع الحقن أو فساد الأنسولين. قم بتغيير مجموعة الحقن واستخدم الأنسولين من قنينة جديدة." }
+            ]
+        },
+        "جهاز التخدير": {
+            name: "جهاز التخدير",
+            principle: "يقوم بتوصيل إمداد دقيق ومستمر من الغازات الطبية الممزوجة بتركيز من بخار التخدير، مع دمج جهاز تنفس صناعي لدعم تنفس المريض.",
+            malfunctions: [
+                { fault: "تسرب الغاز في الدائرة", solution: "قم بإجراء اختبار تسرب الضغط المنخفض. تحقق من جميع التوصيلات والخراطيم والمبخر بحثًا عن تسريبات. استبدل الحلقات الدائرية أو المكونات التالفة." },
+                { fault: "فشل المبخر", solution: "تأكد من أن المبخر مثبت ومغلق بشكل صحيح. تحقق من مستوى العامل. إذا كان معطلاً، استبدله واتصل بالصيانة." },
+                { fault: "فشل/خطأ معايرة مستشعر الأكسجين", solution: "قم بمعايرة مستشعر الأكسجين مقابل هواء الغرفة (21٪) والأكسجين 100٪. إذا فشلت المعايرة، استبدل المستشعر." },
+                { fault: "جهاز التنفس لا يعمل", solution: "تحقق من إعدادات جهاز التنفس. تأكد من أن دائرة المريض ليست مفصولة أو مسدودة. انتقل إلى التهوية اليدوية بالحقيبة إذا لزم الأمر واتصل بالصيانة." }
+            ]
+        },
+        "جهاز الموجات فوق الصوتية": {
+            name: "جهاز الموجات فوق الصوتية",
+            principle: "يستخدم موجات صوتية عالية التردد لإنشاء صور للأعضاء والهياكل داخل الجسم. يرسل محول الطاقة موجات صوتية ويكتشف الصدى أثناء ارتدادها.",
+            malfunctions: [
+                { fault: "جودة صورة رديئة", solution: "ضع المزيد من جل الموجات فوق الصوتية. تحقق من محول الطاقة بحثًا عن التلف. اضبط إعدادات التركيز والكسب." },
+                { fault: "لم يتم الكشف عن محول الطاقة", solution: "أعد توصيل محول الطاقة بإحكام. جرب منفذًا مختلفًا إذا كان متاحًا. أعد تشغيل الجهاز." },
+                { fault: "تشويش في الصورة (مثل التظليل)", solution: "غير زاوية المسح لتجنب العظام أو الغازات. اضبط إعدادات الجهاز مثل التردد والتوافقيات." },
+                { fault: "تجميد النظام", solution: "أعد تشغيل الجهاز. إذا استمرت المشكلة، أبلغ مهندسًا طبيًا حيويًا لأنها قد تكون مشكلة في البرنامج." },
+                { fault: "عدسة محول طاقة متصدعة", solution: "يمكن أن يؤدي هذا إلى ظهور تشويش في الصورة وهو خطر حدوث صدمة كهربائية. توقف عن الاستخدام فورًا وأرسله للإصلاح." }
+            ]
+        },
+        "جهاز الرنين المغناطيسي": {
+            name: "جهاز الرنين المغناطيسي",
+            principle: "يستخدم التصوير بالرنين المغناطيسي (MRI) مجالًا مغناطيسيًا قويًا وموجات راديو وجهاز كمبيوتر لإنتاج صور مفصلة للأعضاء والأنسجة الرخوة والعظام وجميع الهياكل الداخلية الأخرى في الجسم تقريبًا.",
+            malfunctions: [
+                { fault: "تشويش في الصورة (ظلال، سحابات)", solution: "غالبًا ما يكون سببه حركة المريض؛ اطلب من المريض البقاء ثابتًا. قد تشير تشويشات السحابات إلى تسرب الترددات اللاسلكية من الغرفة؛ تأكد من إغلاق الباب." },
+                { fault: "نسبة إشارة إلى ضوضاء منخفضة", solution: "تأكد من اختيار الملف الصحيح ووضعه بشكل صحيح. تحقق من جميع توصيلات الكابلات." },
+                { fault: "إخماد (فقدان الموصلية الفائقة)", solution: "هذه حالة طوارئ خطيرة. قم بإخلاء الغرفة فورًا واتبع بروتوكولات السلامة المعمول بها. يفقد المغناطيس الهيليوم بسرعة." },
+                { fault: "خطأ في اتصال النظام", solution: "أعد تشغيل الكمبيوتر المضيف ومعالج الصور. تحقق من توصيلات كابل الشبكة." },
+                { fault: "فشل الملف", solution: "النظام لا يتعرف على الملف أو الصور بها تشويش شديد. حاول إعادة توصيل الملف. إذا استمرت المشكلة، فمن المحتمل أن الملف تالف ويحتاج إلى إصلاح." }
+            ]
+        },
+        "جهاز التصوير المقطعي": {
+            name: "جهاز التصوير المقطعي",
+            principle: "يجمع التصوير المقطعي المحوسب (CT) سلسلة من صور الأشعة السينية المأخوذة من زوايا مختلفة حول جسمك ويستخدم المعالجة الحاسوبية لإنشاء صور مقطعية (شرائح) للعظام والأوعية الدموية والأنسجة الرخوة.",
+            malfunctions: [
+                { fault: "ارتفاع درجة حرارة الأنبوب", solution: "اسمح لأنبوب الأشعة السينية بالتبريد بين عمليات المسح. اتبع إرشادات الشركة المصنعة للفواصل الزمنية للمسح." },
+                { fault: "تشويش في شكل خطوط", solution: "يحدث بسبب الأجسام الكثيفة مثل الغرسات المعدنية أو حركة المريض. استخدم برنامج تقليل التشويش إذا كان متاحًا." },
+                { fault: "فشل دوران الهيكل", solution: "قد يكون قد تم الضغط على زر الإيقاف في حالات الطوارئ. إذا لم يكن الأمر كذلك، فهذا عطل كبير يتطلب صيانة من مهندس مؤهل." },
+                { fault: "خطأ في حركة الطاولة", solution: "تحقق من وجود عوائق حول طاولة المريض. أعد تشغيل النظام. إذا استمرت المشكلة، اتصل بالصيانة." },
+                { fault: "تشويش في شكل حلقات", solution: "غالبًا ما يكون سببه عنصر كاشف غير معاير أو معيب. يجب إجراء معايرة للنظام (معايرة الهواء). إذا استمرت المشكلة، فإن الصيانة مطلوبة." }
+            ]
+        },
+        "جهاز مراقبة المريض": {
+            name: "جهاز مراقبة المريض",
+            principle: "جهاز متعدد المعلمات يقيس ويسجل ويعرض مختلف العلامات الحيوية للمريض مثل تخطيط القلب ومعدل التنفس وضغط الدم وتشبع الأكسجين.",
+            malfunctions: [
+                { fault: "إنذارات كاذبة", solution: "تحقق من وضع المستشعر وحالة المريض. اضبط حدود الإنذار لتكون مناسبة للمريض." },
+                { fault: "قراءة غير دقيقة لتشبع الأكسجين", solution: "أعد وضع مستشعر تشبع الأكسجين. تحقق من ضعف التروية أو طلاء الأظافر أو حركة المريض المفرطة." },
+                { fault: "فشل نفخ سوار ضغط الدم", solution: "تحقق من أن خرطوم الهواء متصل بشكل صحيح بكل من الشاشة والسوار. تحقق من وجود تسرب في السوار أو الخرطوم." },
+                { fault: "فقدان إشارة تخطيط القلب", solution: "تحقق من أن جميع أقطاب تخطيط القلب متصلة وتلامس الجلد جيدًا. تحقق من توصيل كابل المريض." },
+                { fault: "تجميد الشاشة أو فراغها", solution: "حاول إعادة تشغيل الشاشة. إذا فشلت في إعادة التشغيل، فقد تكون مشكلة في مصدر الطاقة أو البرنامج تتطلب دعمًا فنيًا." }
+            ]
+        },
+        "جهاز الأشعة السينية": {
+            name: "جهاز الأشعة السينية",
+            principle: "يولد الأشعة السينية، وهي شكل من أشكال الإشعاع الكهرومغناطيسي، التي يتم تمريرها عبر الجسم لإنشاء صور للهياكل الداخلية. تمتص الهياكل الكثيفة مثل العظام المزيد من الأشعة السينية وتظهر بيضاء.",
+            malfunctions: [
+                { fault: "لا يوجد تعريض للأشعة السينية", solution: "تحقق من تشغيل الجهاز وأن مفتاح التعريض اليدوي يعمل. تأكد من استيفاء جميع أقفال الأمان (مثل إغلاق الباب)." },
+                { fault: "الصورة داكنة جدًا أو فاتحة جدًا", solution: "اضبط عوامل التعريض (kVp, mAs). تحقق من المسافة بين الأنبوب والكاشف (SID)." },
+                { fault: "انحشار ميكانيكي (أنبوب أو باكي)", solution: "حرر جميع الأقفال وحاول تحريك المعدات برفق. لا تستخدم القوة. اتصل بالصيانة إذا ظلت عالقة." },
+                { fault: "رمز خطأ على وحدة التحكم", solution: "لاحظ رمز الخطأ واستشر دليل المستخدم. قد تحل إعادة تشغيل النظام بعض المشكلات، وإلا، اتصل بالصيانة." },
+                { fault: "فشل ضوء الميزاء", solution: "احترق المصباح في الميزاء ويحتاج إلى استبداله بواسطة فني. يصعب تحديد الموضع بدقة بدونه." }
+            ]
+        },
+        "منظار داخلي": {
+            name: "منظار داخلي",
+            principle: "يستخدم أنبوبًا مرنًا به ضوء وكاميرا لفحص الجزء الداخلي من عضو مجوف أو تجويف في الجسم.",
+            malfunctions: [
+                { fault: "خرج ضوء ضعيف أو معدوم", solution: "تحقق مما إذا كان مصدر الضوء قيد التشغيل والمصباح يعمل. تأكد من أن كابل دليل الضوء متصل بشكل صحيح بكل من المنظار والمصدر." },
+                { fault: "صورة ضبابية أو غير واضحة", solution: "نظف العدسة البعيدة. استخدم محلولًا مضادًا للضباب. قد يكون النفخ ضعيفًا، مما يؤدي إلى ملامسة العدسة للأنسجة." },
+                { fault: "فوهة نفاثة الماء أو الهواء/الماء مسدودة", solution: "حاول شطف القناة بالماء. إذا ظلت مسدودة، فإنها تحتاج إلى تنظيف وصيانة احترافية." },
+                { fault: "فشل في الانحناء", solution: "مقابض التحكم لا تحرك طرف المنظار. هذا فشل ميكانيكي في أسلاك الانحناء، ويتطلب إصلاحًا فوريًا." }
+            ]
+        },
+        "مقياس تأكسج النبض": {
+            name: "مقياس تأكسج النبض",
+            principle: "طريقة غير جراحية لمراقبة تشبع الأكسجين لدى الشخص (SpO2). يمرر مستشعر يوضع على جزء رفيع من جسم المريض، عادة ما يكون طرف الإصبع أو شحمة الأذن، طولين موجيين من الضوء عبر الجسم إلى كاشف ضوئي.",
+            malfunctions: [
+                { fault: "لا توجد قراءة أو يبحث", solution: "تأكد من وضع المستشعر بشكل صحيح. تحقق من ضعف الدورة الدموية أو الأطراف الباردة أو طلاء الأظافر الداكن." },
+                { fault: "قراءة غير دقيقة", solution: "تحقق من حركة المريض أو تداخل الضوء المحيط أو نوع المستشعر غير المناسب للمريض (مثل البالغين مقابل الأطفال)." },
+                { fault: "قوة إشارة منخفضة (تروية منخفضة)", solution: "أعد وضع المستشعر إلى موقع به تروية أفضل، مثل إصبع مختلف أو شحمة الأذن. قم بتدفئة الطرف." },
+                { fault: "عطل في المستشعر", solution: "تحقق من المستشعر بحثًا عن تلف مرئي وتأكد من أن الكابل ليس مهترئًا. جرب مستشعرًا مختلفًا." },
+                { fault: "تداخل الإشارة", solution: "يحدث بسبب التسمم بأول أكسيد الكربون (قراءة عالية خاطئة)، أو بعض الأصباغ مثل أزرق الميثيلين (قراءة منخفضة خاطئة)." }
+            ]
+        },
+        "جهاز قياس السكر": {
+            name: "جهاز قياس السكر",
+            principle: "يقيس التركيز التقريبي للجلوكوز في الدم. يتفاعل شريط اختبار به مواد كيميائية مع الجلوكوز في قطرة دم، ويقرأ الجهاز نتيجة هذا التفاعل.",
+            malfunctions: [
+                { fault: "رمز خطأ على الشاشة", solution: "ارجع إلى دليل المستخدم لمعرفة رمز الخطأ المحدد. تشمل المشكلات الشائعة استخدام شريط اختبار مستعمل أو عينة دم غير كافية أو درجة حرارة خارج النطاق." },
+                { fault: "قراءات غير متسقة أو غير معقولة", solution: "قم بإجراء اختبار مراقبة الجودة باستخدام محلول التحكم. تأكد من أن اليدين نظيفتان وجافتان. تحقق من تاريخ انتهاء صلاحية شرائط الاختبار." },
+                { fault: "الجهاز لا يعمل", solution: "تحقق من البطاريات واستبدلها. نظف نقاط تلامس البطارية." },
+                { fault: "خطأ في الترميز", solution: "إذا كان الجهاز يتطلب ترميزًا، فتأكد من أن الرمز الموجود على الجهاز يطابق الرمز الموجود على قنينة شرائط الاختبار." }
+            ]
+        },
+        "جهاز تفتيت الحصى": {
+            name: "جهاز تفتيت الحصى",
+            principle: "يستخدم موجات صدمية عالية الطاقة لتكسير حصوات الكلى وغيرها من الحصوات إلى قطع أصغر يمكن أن تخرج من الجسم. الإجراء غير جراحي.",
+            malfunctions: [
+                { fault: "طاقة موجة الصدمة منخفضة", solution: "تحقق من إعدادات الطاقة. قد يحتاج مولد موجات الصدمة إلى صيانة أو استبدال. تحقق من جودة الماء في النظام." },
+                { fault: "خطأ في الاستهداف", solution: "نظام التصوير (الموجات فوق الصوتية أو الأشعة السينية) المستخدم لتحديد الموقع خارج المعايرة. أعد معايرة نظام الاستهداف." },
+                { fault: "تسرب وسادة الماء", solution: "الغشاء المرن الذي يربط موجة الصدمة بالمريض تالف. استبدل غشاء وسادة الماء." },
+                { fault: "رمز خطأ في النظام", solution: "تم الكشف عن خطأ عام. أعد تشغيل النظام. إذا استمر الخطأ، فاستشر دليل الخدمة واتصل بفني." }
+            ]
+        },
+        "سكين جاما": {
+            name: "سكين جاما",
+            principle: "جهاز جراحة إشعاعية يستخدم حزمًا متعددة (192 أو 201) من أشعة جاما لاستهداف وتدمير الأورام والتشوهات الأخرى في الدماغ بدقة دون شق جراحي.",
+            malfunctions: [
+                { fault: "خطأ في مصدر الإشعاع", solution: "يشير إلى وجود مشكلة في أحد مصادر الكوبالت 60 أو التدريع. يتطلب خدمة فورية من قبل موظفين مؤهلين." },
+                { fault: "خطأ في نظام تحديد موضع المريض", solution: "الأريكة الآلية بها خطأ في الحركة أو لم تتم معايرتها بشكل صحيح. تحقق من وجود عوائق، ثم أعد معايرة النظام." },
+                { fault: "خطأ في خوذة الميزاء", solution: "لا يمكن للنظام التحقق من حجم الخوذة الصحيح أو أن الخوذة غير مثبتة بشكل صحيح. أعد تثبيت الخوذة أو جرب واحدة مختلفة." },
+                { fault: "فشل الاتصال بنظام تخطيط العلاج", solution: "تحقق من اتصالات الشبكة بين محطة التخطيط ووحدة العلاج. أعد تشغيل المكونات ذات الصلة." }
+            ]
+        },
+        "المسرع الخطي": {
+            name: "المسرع الخطي",
+            principle: "جهاز يستخدم لعلاجات الإشعاع بالحزمة الخارجية للسرطان. يسرع الإلكترونات إلى طاقة عالية ويسمح لها بالاصطدام بهدف معدني ثقيل، مما ينتج عنه أشعة سينية عالية الطاقة يتم بعد ذلك تشكيلها لتناسب شكل الورم.",
+            malfunctions: [
+                { fault: "خطأ في نظام قياس الجرعات", solution: "يكتشف نظام مراقبة الجرعات في الجهاز وجود تباين. سيتم تثبيط الحزمة. يتطلب فحصًا ومعايرة من قبل فيزيائي طبي." },
+                { fault: "خطأ في حركة الهيكل/الميزاء/الأريكة", solution: "فشل محرك أو مستشعر أو قفل أمان. سيتوقف النظام. يتطلب مهندس خدمة." },
+                { fault: "فشل نظام التفريغ", solution: "يفقد دليل المسرع فراغه، مما يمنع تسريع الإلكترونات. يتطلب خدمة للعثور على التسرب وإصلاحه." },
+                { fault: "خطأ في نظام الترددات الراديوية (المغناترون/الكلايسترون)", solution: "فشل مولد الترددات الراديوية الذي يمد المسرع بالطاقة. لا يمكن للجهاز إنتاج الحزمة. يتطلب خدمة." }
+            ]
+        },
+        "غرفة الأكسجين عالي الضغط": {
+            name: "غرفة الأكسجين عالي الضغط",
+            principle: "غرفة تسمح للشخص بتنفس الأكسجين النقي في بيئة مضغوطة. يسمح هذا الضغط العالي للرئتين بجمع كمية أكبر من الأكسجين مما هو ممكن عند ضغط الهواء العادي، مما يعزز الشفاء.",
+            malfunctions: [
+                { fault: "فشل في الضغط", solution: "تحقق من وجود تسرب في أختام الأبواب والصمامات. تأكد من أن مصدر الهواء المضغوط يعمل ومتصل." },
+                { fault: "تقلب الضغط", solution: "قد يكون منظم الضغط معطلاً. يتطلب هذا فحصًا ومعايرة بواسطة فني." },
+                { fault: "فشل نظام الاتصالات", solution: "نظام الاتصال الداخلي بين المريض والمشغل معطل. تحقق من التوصيلات والطاقة. لا تعمل حتى يتم إصلاحه." },
+                { fault: "إنذار تركيز الأكسجين العالي", solution: "خطر نشوب حريق. قم بتهوية الغرفة على الفور. قد يحتاج مستشعر الأكسجين إلى إعادة معايرة أو استبدال." }
+            ]
+        },
+        "مضخة التغذية المعوية": {
+            name: "مضخة التغذية المعوية",
+            principle: "مضخة تستخدم لتوصيل تركيبة غنية بالعناصر الغذائية مباشرة إلى المعدة أو الأمعاء الدقيقة من خلال أنبوب تغذية.",
+            malfunctions: [
+                { fault: "إنذار الانسداد", solution: "تحقق من أنبوب التغذية بحثًا عن التواءات أو انسدادات. اغسل الأنبوب بالماء حسب البروتوكول." },
+                { fault: "لا يوجد تدفق / إنذار كيس فارغ", solution: "كيس التغذية فارغ؛ استبدله. تأكد من تحميل مجموعة التغذية بشكل صحيح في المضخة." },
+                { fault: "بطارية منخفضة", solution: "قم بتوصيل المضخة بمأخذ تيار متردد. قد تحتاج البطارية إلى استبدال إذا لم تحتفظ بالشحن." },
+                { fault: "جرعة غير صحيحة تم توصيلها", solution: "تحقق من إعدادات المعدل والجرعة. قد تحتاج المضخة إلى إعادة معايرة بواسطة فني." }
+            ]
+        },
+        "مضخة تسكين الألم الذاتية": {
+            name: "مضخة تسكين الألم الذاتية",
+            principle: "مضخة تسكين الألم التي يتحكم فيها المريض (PCA) هي جهاز يسمح للمريض بإعطاء نفسه جرعات صغيرة ومضبوطة من مسكنات الألم. يتم برمجتها بحدود محددة لمنع الجرعة الزائدة.",
+            malfunctions: [
+                { fault: "إنذار الانسداد", solution: "تحقق من خط الوريد بحثًا عن التواءات أو قسطرة مسدودة. تأكد من أن جميع المشابك مفتوحة." },
+                { fault: "لم يتم الكشف عن المحقنة", solution: "تأكد من أن المحقنة بالحجم الصحيح ومثبتة بشكل صحيح في آلية المضخة." },
+                { fault: "بطارية منخفضة", solution: "قم بتوصيل المضخة بمصدر طاقة. استبدل حزمة البطارية إذا كانت قديمة." },
+                { fault: "خطأ في البرمجة", solution: "يتطلب من ممرضتين التحقق والتأكيد بشكل مستقل من الإعدادات المبرمجة لمنع الأخطاء الدوائية." }
+            ]
+        },
+        "جهاز الشفط الطبي": {
+            name: "جهاز الشفط الطبي",
+            principle: "جهاز يستخدم لإزالة العوائق - مثل المخاط أو اللعاب أو الدم أو الإفرازات - من مجرى الهواء لدى الشخص. يولد ضغطًا سلبيًا لسحب السوائل من خلال قسطرة.",
+            malfunctions: [
+                { fault: "شفط منخفض أو معدوم", solution: "تحقق من وجود تسرب في الأنابيب والتوصيلات. تأكد من إغلاق غطاء وعاء التجميع. تحقق مما إذا كان الوعاء ممتلئًا." },
+                { fault: "الفلتر مسدود", solution: "قد يكون الفلتر المقاوم للماء مسدودًا بالسوائل، مما يمنع تدفق الهواء. استبدل الفلتر." },
+                { fault: "الجهاز يسخن بشكل مفرط", solution: "تأكد من أن منافذ التهوية في الجهاز غير مسدودة. نظف أي غبار من الفتحات." },
+                { fault: "تشغيل صاخب", solution: "قد يكون المحرك مهترئًا. إذا كان الضجيج مفرطًا، فإن الوحدة تتطلب صيانة." }
+            ]
+        },
+        "وحدة العلاج بالتبريد": {
+            name: "وحدة العلاج بالتبريد",
+            principle: "تستخدم البرودة الشديدة لتجميد وتدمير الأنسجة غير الطبيعية، مثل الثآليل أو الخلايا محتملة التسرطن. يتم ذلك عادة باستخدام النيتروجين السائل أو غاز الأرجون.",
+            malfunctions: [
+                { fault: "المسبار لا يتجمد", solution: "تأكد من أن أسطوانة الغاز (مثل النيتروجين السائل) ليست فارغة ومتصلة بشكل صحيح. تحقق من وجود انسدادات في طرف مسبار التبريد." },
+                { fault: "تسرب الغاز", solution: "يمكنك سماع صوت هسهسة. أغلق الصمام على أسطوانة الغاز فورًا وقم بتهوية الغرفة. تحقق من جميع التوصيلات والأختام." },
+                { fault: "درجة حرارة غير متسقة", solution: "قد يكون منظم درجة الحرارة أو المستشعر معيبًا. تتطلب الوحدة معايرة أو خدمة." },
+                { fault: "خطأ في العرض", solution: "تظهر وحدة التحكم رمز خطأ. أعد تشغيل النظام. استشر الدليل لمعرفة الرمز المحدد." }
+            ]
+        },
+        "وحدة العلاج بالليزر": {
+            name: "وحدة العلاج بالليزر",
+            principle: "يُعرف أيضًا باسم العلاج بالليزر منخفض المستوى (LLLT)، ويستخدم أطوال موجية محددة من الضوء للتفاعل مع الأنسجة، والذي يُعتقد أنه يسرع عملية الشفاء. يستخدم للمساعدة في تقليل الألم والالتهابات.",
+            malfunctions: [
+                { fault: "لا يوجد خرج ليزر", solution: "تحقق من تشغيل الوحدة وأن القطعة اليدوية متصلة بشكل صحيح. تأكد من تعشيق مفتاح قفل الأمان." },
+                { fault: "قراءة طاقة منخفضة", solution: "قد يكون صمام الليزر قديمًا ويفقد طاقته. تتطلب الوحدة معايرة بواسطة فني." },
+                { fault: "ارتفاع درجة حرارة القطعة اليدوية", solution: "قد تكون مروحة التبريد في القطعة اليدوية أو الوحدة الرئيسية قد فشلت. توقف عن الاستخدام واطلب صيانتها." },
+                { fault: "رمز خطأ على الشاشة", solution: "لاحظ الرمز واستشر دليل المستخدم. قد تحل إعادة تشغيل النظام المشكلة." }
+            ]
+        },
+        "ماسح التصوير المقطعي بالإصدار البوزيتروني": {
+            name: "ماسح التصوير المقطعي بالإصدار البوزيتروني",
+            principle: "التصوير المقطعي بالإصدار البوزيتروني (PET) هو تقنية تصوير في الطب النووي تستخدم كمية صغيرة من دواء مشع (متتبع) لإظهار كيفية عمل الأنسجة والأعضاء. غالبًا ما يستخدم للكشف عن السرطان.",
+            malfunctions: [
+                { fault: "فشل الكاشف", solution: "مجموعة من الكواشف لا توفر إشارة. هذا عطل كبير يتطلب مهندس خدمة لاستبدال وحدة الكاشف." },
+                { fault: "تشويش في الصورة", solution: "يمكن أن يكون سببه حركة المريض أو عدم المعايرة. قم بإجراء فحص يومي لمراقبة الجودة باستخدام شبح للتحقق من المعايرة." },
+                { fault: "خطأ في اتصال الهيكل", solution: "فقدت وحدة التحكم الاتصال بهيكل الماسح الضوئي. تحقق من كابلات الشبكة وأعد تشغيل النظام." },
+                { fault: "خطأ في حركة الطاولة", solution: "طاولة المريض لا تتحرك بشكل صحيح. تحقق من وجود عوائق. قد يحتاج نظام التحكم في الطاولة إلى خدمة." }
+            ]
+        },
+        "جهاز تخطيط العضلات الكهربائي": {
+            name: "جهاز تخطيط العضلات الكهربائي",
+            principle: "يقيس تخطيط كهربية العضل (EMG) استجابة العضلات أو النشاط الكهربائي استجابة لتحفيز العصب للعضلة. يستخدم للمساعدة في الكشف عن التشوهات العصبية العضلية.",
+            malfunctions: [
+                { fault: "ضوضاء إشارة عالية", solution: "تأكد من تحضير الجلد بشكل صحيح وتأريض المريض. تحقق من وجود مصادر قريبة للتداخل الكهربائي (مثل خطوط الكهرباء والمعدات الأخرى)." },
+                { fault: "لا توجد إشارة من القطب", solution: "تحقق من توصيل القطب بالمضخم. قد يكون سلك القطب مكسورًا. جرب قطبًا مختلفًا." },
+                { fault: "المحفز لا يعمل", solution: "تحقق من توصيل القطب المحفز. قد يكون خرج المحفز قد فشل، مما يتطلب خدمة." },
+                { fault: "تجميد البرنامج", solution: "تجمد كمبيوتر الالتقاط. أعد تشغيل البرنامج. إذا استمرت المشكلة، فقد يكون هناك تعارض في الأجهزة." }
+            ]
+        },
+        "مقياس التنفس": {
+            name: "مقياس التنفس",
+            principle: "جهاز لقياس حجم الهواء المستنشق والزفير من الرئتين. يستخدم لتشخيص حالات مثل الربو والتليف الرئوي ومرض الانسداد الرئوي المزمن.",
+            malfunctions: [
+                { fault: "قراءات غير دقيقة", solution: "الجهاز يحتاج إلى معايرة. قم بإجراء فحص معايرة باستخدام محقنة معايرة سعة 3 لتر." },
+                { fault: "مستشعر التدفق مسدود", solution: "مستشعر التوربين أو مقياس سرعة الهواء مسدود بالحطام أو الرطوبة. نظف المستشعر أو استبدله وفقًا لتعليمات الشركة المصنعة." },
+                { fault: "الجهاز لا يتصل بالكمبيوتر", solution: "تحقق من اتصال USB أو Bluetooth. أعد تثبيت برامج تشغيل الجهاز على الكمبيوتر." },
+                { fault: "تم الكشف عن تسرب", solution: "تأكد من أن المريض لديه ختم محكم حول قطعة الفم. تحقق من الأنابيب بحثًا عن شقوق أو توصيلات مفكوكة." }
+            ]
+        },
+        "مقياس كثافة العظام": {
+            name: "مقياس كثافة العظام",
+            principle: "يُعرف أيضًا باسم ماسح DEXA (قياس امتصاص الأشعة السينية ثنائي الطاقة)، ويستخدم جرعة صغيرة جدًا من الإشعاع المؤين لإنتاج صور لداخل الجسم لقياس فقدان العظام.",
+            malfunctions: [
+                { fault: "فشل اختبار ضمان الجودة اليومي", solution: "فشل فحص ضمان الجودة اليومي باستخدام شبح. لا تفحص المرضى. كرر فحص ضمان الجودة. إذا فشل مرة أخرى، اتصل بالصيانة." },
+                { fault: "خطأ في مصدر الأشعة السينية", solution: "فشل أنبوب الأشعة السينية أو لا يتلقى طاقة. يتطلب خدمة من قبل مهندس مؤهل." },
+                { fault: "فشل حركة ذراع الكاشف", solution: "فشل محرك أو لوحة تحكم ذراع المسح. تحقق من رموز الخطأ واتصل بالصيانة." },
+                { fault: "تشويش في الصورة", solution: "يحدث بسبب حركة المريض أو الأجسام غير الشفافة للأشعة مثل الأزرار أو السحابات. تأكد من وضع المريض بشكل صحيح وإزالة جميع الأجسام المعدنية." }
+            ]
+        },
+        "جهاز دوبلر لمراقبة الجنين": {
+            name: "جهاز دوبلر لمراقبة الجنين",
+            principle: "محول طاقة محمول بالموجات فوق الصوتية يستخدم للكشف عن نبضات قلب الجنين للرعاية قبل الولادة. يستخدم تأثير دوبلر لتوفير محاكاة مسموعة لنبضات القلب.",
+            malfunctions: [
+                { fault: "لا يوجد صوت أو تشويش عالي", solution: "ضع المزيد من جل الموجات فوق الصوتية. استبدل البطاريات. قد يكون كابل المسبار تالفًا؛ حاول تحريكه للتحقق من الاتصال المتقطع." },
+                { fault: "صوت منخفض", solution: "تحقق من التحكم في مستوى الصوت. قد يكون مكبر الصوت معطلاً. حاول توصيل سماعات الرأس للتحقق مما إذا كانت دائرة الصوت تعمل." },
+                { fault: "المسبار لا يعمل", solution: "قد يكون الكريستال في مسبار الموجات فوق الصوتية متصدعًا أو تالفًا. يجب استبدال المسبار." },
+                { fault: "عرض معدل ضربات القلب غير دقيق", solution: "غالبًا ما يلتقط معدل ضربات قلب الأم بدلاً من ذلك. أعد وضع المسبار للعثور على نبضات قلب الجنين. قد يكون برنامج الحساب معيبًا أيضًا." }
+            ]
+        },
+        "منظار القصبات": {
+            name: "منظار القصبات",
+            principle: "أنبوب رفيع ومرن به ضوء وكاميرا يتم تمريره عبر الأنف أو الفم، أسفل الحلق، إلى الرئتين لفحص الشعب الهوائية.",
+            malfunctions: [
+                { fault: "خرج ضوء ضعيف أو معدوم", solution: "تحقق مما إذا كان مصدر الضوء قيد التشغيل والمصباح يعمل. تأكد من أن كابل دليل الضوء متصل بشكل صحيح." },
+                { fault: "صورة ضبابية", solution: "العدسة في الطرف متسخة. نظف العدسة البعيدة. قد يكون مستشعر الكاميرا معطلاً، مما يتطلب إصلاحًا." },
+                { fault: "قناة الشفط مسدودة", solution: "حاول شطف القناة بالماء المعقم. إذا ظلت مسدودة، فإنها تحتاج إلى خدمة وتنظيف احترافي." },
+                { fault: "فشل في الانحناء", solution: "مقابض التحكم لا تحرك طرف المنظار. أسلاك الانحناء الداخلية مكسورة، ويجب إرسال المنظار للإصلاح." }
+            ]
+        },
+        "منظار القولون": {
+            name: "منظار القولون",
+            principle: "أنبوب مرن ومضاء به كاميرا يستخدم لفحص طول القولون والمستقيم بالكامل.",
+            malfunctions: [
+                { fault: "فوهة نفاثة الماء مسدودة", solution: "الفوهة المستخدمة لتنظيف الرؤية مسدودة. حاول شطفها. إذا ظلت مسدودة، فإنها تتطلب تنظيفًا احترافيًا." },
+                { fault: "الصورة داكنة أو بها بقع سوداء", solution: "يمكن أن يشير هذا إلى وجود ألياف بصرية مكسورة داخل أنبوب إدخال المنظار. يحتاج المنظار إلى إصلاح." },
+                { fault: "صمامات الهواء/الماء عالقة", solution: "من الصعب الضغط على الصمامات الموجودة على مقبض التحكم أو أنها عالقة. يجب إزالتها وتنظيفها وتشحيمها أو استبدالها." },
+                { fault: "التواء أنبوب الإدخال", solution: "المنظار لا يتقدم بسبب تشكيل حلقة داخل القولون. يتطلب تغيير وضع المريض أو سحب المنظار وإعادة إدخاله." }
+            ]
+        },
+        "جهاز TENS": {
+            name: "جهاز TENS",
+            principle: "التحفيز الكهربائي للأعصاب عبر الجلد (TENS) هو وسيلة لتخفيف الألم تتضمن استخدام تيار كهربائي خفيف. جهاز TENS هو جهاز صغير يعمل بالبطارية وله أسلاك متصلة بوسادات لاصقة تسمى الأقطاب الكهربائية.",
+            malfunctions: [
+                { fault: "لا يوجد إحساس", solution: "تحقق من مستويات البطارية. تأكد من توصيل الأسلاك بالكامل بالوحدة والأقطاب الكهربائية. زد من الشدة." },
+                { fault: "التصاق ضعيف للقطب", solution: "نظف الجلد بالماء والصابون قبل التطبيق. استبدل الأقطاب الكهربائية إذا لم تعد لزجة." },
+                { fault: "تحفيز غير متساوٍ", solution: "تأكد من أن كلا القطبين من قناة واحدة ملتصقان بشكل صحيح بالجلد. تحقق من أسلاك التوصيل بحثًا عن التلف." },
+                { fault: "تهيج الجلد", solution: "توقف عن الاستخدام في تلك المنطقة. جرب نوعًا مختلفًا من الأقطاب الكهربائية (مثل للبشرة الحساسة). تأكد من نظافة الجلد قبل الاستخدام." },
+                { fault: "خرج متقطع", solution: "غالبًا ما يكون سببه سلك توصيل مكسور. حاول تحريك السلك لتحديد مكان الكسر. استبدل أسلاك التوصيل." }
+            ]
+        },
+        "حوض العلاج المائي": {
+            name: "حوض العلاج المائي",
+            principle: "حوض متخصص، عادة ما يكون أكثر دفئًا من حمام السباحة العادي، يستخدم للتمارين العلاجية. يقلل طفو الماء من الضغط على المفاصل، وتهدئ الحرارة العضلات.",
+            malfunctions: [
+                { fault: "السخان لا يعمل", solution: "تحقق من مصدر طاقة السخان وإعدادات منظم الحرارة. قد يكون عنصر التسخين قد فشل ويحتاج إلى استبدال." },
+                { fault: "فشل نظام الترشيح", solution: "المضخة لا تعمل أو الفلتر مسدود. تحقق من قاطع دائرة المضخة. نظف الفلتر أو اغسله عكسيًا." },
+                { fault: "عطل في رافعة المريض", solution: "الرافعة الهيدروليكية أو الكهربائية لا تعمل. تحقق من مصدر الطاقة/السائل الهيدروليكي. تتطلب الرافعة عمليات فحص وسلامة منتظمة." },
+                { fault: "عدم توازن كيميائي", solution: "مستويات الأس الهيدروجيني أو الكلور في الماء غير صحيحة. اختبر الماء وأضف المواد الكيميائية كما هو مطلوب للحفاظ على ظروف آمنة ومريحة." }
+            ]
+        },
+        "قضبان متوازية": {
+            name: "قضبان متوازية",
+            principle: "جهاز إعادة تأهيل بسيط يتكون من درابزين متوازيين يستخدم لمساعدة المرضى على استعادة القوة والتوازن ونطاق الحركة، خاصة للمشي.",
+            malfunctions: [
+                { fault: "القضبان غير مستقرة أو متذبذبة", solution: "أحكم ربط جميع البراغي على القاعدة والدعامات الرأسية. تأكد من أن سطح الأرض مستوٍ." },
+                { fault: "تعديل الارتفاع عالق", solution: "دبابيس القفل أو المشابك محشورة. تأكد من فصلها تمامًا قبل محاولة الضبط. قد تتطلب تشحيمًا." },
+                { fault: "سطح الدرابزين تالف", solution: "يمكن أن تكون الشقوق أو الشظايا على الدرابزين خطرًا على السلامة. يجب إصلاح الدرابزين أو استبداله." },
+                { fault: "انزلاق تعديل العرض", solution: "آلية قفل عرض القضيب لا تمسك. افحص نظام القفل وأحكم ربطه أو أصلحه." }
+            ]
+        },
+        "جهاز الموجات فوق الصوتية العلاجي": {
+            name: "جهاز الموجات فوق الصوتية العلاجي",
+            principle: "يستخدم موجات صوتية عالية التردد لعلاج إصابات الجهاز العضلي الهيكلي. يولد حرارة عميقة داخل الأنسجة لتعزيز الشفاء وتقليل الالتهاب وتخفيف الألم.",
+            malfunctions: [
+                { fault: "لا يوجد إحساس بالحرارة", solution: "تأكد من استخدام كمية كافية من جل التوصيل. تحقق من أن إعداد الشدة مناسب. قد لا يصدر الجهاز طاقة." },
+                { fault: "ارتفاع درجة حرارة رأس محول الطاقة", solution: "هذه علامة على وجود عطل خطير، ربما تلف في الكريستال. توقف عن الاستخدام فورًا وأرسله للخدمة." },
+                { fault: "خطأ في طاقة الخرج", solution: "المعايرة الداخلية للجهاز غير صحيحة. يتطلب صيانة وإعادة معايرة بواسطة فني مؤهل." },
+                { fault: "الوحدة لا تعمل", solution: "تحقق من سلك الطاقة والمأخذ. تحقق من المصهر الرئيسي إذا كان يمكن الوصول إليه." }
+            ]
+        }
+    },
+    books: [
+      { title: "الأجهزة والقياسات الطبية الحيوية", author: "ليزلي كرومويل", description: "كتاب دراسي كلاسيكي يغطي مبادئ الأجهزة الطبية الحيوية." },
+      { title: "الأجهزة الطبية: الاستخدام والتوريد", author: "منظمة الصحة العالمية", description: "دليل للعاملين في مجال الرعاية الصحية حول اختيار وإدارة الأجهزة الطبية." },
+    ],
+    bookDetails: {
+        "الأجهزة والقياسات الطبية الحيوية": {
+            title: "الأجهزة والقياسات الطبية الحيوية",
+            author: "ليزلي كرومويل",
+            description: "كتاب دراسي كلاسيكي يغطي مبادئ الأجهزة الطبية الحيوية.",
+            summary: "يقدم هذا الكتاب نظرة شاملة على المبادئ الأساسية وتصميم الأجهزة الطبية الحيوية. ويغطي مجموعة واسعة من المواضيع بما في ذلك الإمكانات الحيوية، وأجهزة الاستشعار، والمكبرات، وأنواع مختلفة من المعدات الطبية المستخدمة للتشخيص والعلاج. وهو بمثابة مورد أساسي للطلاب والمهنيين في الهندسة الطبية الحيوية.",
+        },
+        "الأجهزة الطبية: الاستخدام والتوريد": {
+            title: "الأجهزة الطبية: الاستخدام والتوريد",
+            author: "منظمة الصحة العالمية",
+            description: "دليل للعاملين في مجال الرعاية الصحية حول اختيار وإدارة الأجهزة الطبية.",
+            summary: "يقدم هذا الدليل من منظمة الصحة العالمية نصائح عملية حول توريد وتقييم وإدارة الأجهزة الطبية، خاصة في البيئات محدودة الموارد. يغطي الدورة الكاملة لحياة الجهاز، من تقييم الاحتياجات والشراء إلى الصيانة والإيقاف، مما يضمن الجودة والسلامة في تقديم الرعاية الصحية."
+        }
+    },
+    articles: [
+        { 
+            title: "الإلكترونيات الجلدية", 
+            authors: "د.-ه. كيم، ج. أ. روجرز، وآخرون", 
+            journal: "مجلة ساينس، 2011", 
+            summary: "ورقة بحثية رائدة تقدم مفهوم الأنظمة الإلكترونية التي يمكن لصقها على الجلد مثل الوشم المؤقت، مما يوفر إمكانيات لمراقبة الإشارات الفسيولوجية بدون أجهزة ضخمة.", 
+            url: "https://doi.org/10.1126/science.1206157" 
+        },
+        { 
+            title: "التعلم العميق للمعلوماتية الصحية", 
+            authors: "أ. أ. فيصل، د. أ. كليفتون، وآخرون", 
+            journal: "مجلة IEEE للمعلوماتية الطبية الحيوية والصحية، 2017", 
+            summary: "نظرة عامة على كيفية إحداث تقنيات التعلم العميق ثورة في المعلوماتية الصحية، لا سيما في تحليل بيانات التصوير الطبي المعقدة لتحسين التشخيص والتنبؤ.", 
+            url: "https://doi.org/10.1109/JBHI.2016.2636665" 
+        },
+        { 
+            title: "التكنولوجيا القابلة للارتداء في الطب: الماضي والحاضر والمستقبل", 
+            authors: "س. ك. يتيسن، ج. ل. مارتينيز-هورتادو، وآخرون", 
+            journal: "أدفانسد ماتيريالز، 2016", 
+            summary: "تغطي هذه المراجعة الشاملة تطور الأجهزة الطبية القابلة للارتداء، من المفاهيم المبكرة إلى أجهزة الاستشعار الحديثة المتكاملة، وتناقش المواد والتصنيع والتطبيقات المستقبلية في الطب الشخصي.", 
+            url: "https://doi.org/10.1002/adma.201601474" 
+        },
+        { 
+            title: "التشخيص في نقطة الرعاية: التطورات الحديثة في عصر متصل", 
+            authors: "م. ل. ي. سين، ت. م. ه. لي، وآخرون", 
+            journal: "ذا لانسيت، 2018", 
+            summary: "يناقش أحدث التطورات في أجهزة التشخيص في نقطة الرعاية، مع التركيز على تكاملها مع تقنيات الصحة المتنقلة (mHealth) لتحسين الوصول إلى الرعاية الصحية والنتائج على مستوى العالم.", 
+            url: "https://doi.org/10.1016/S0140-6736(18)30572-1" 
+        },
+        { 
+            title: "واجهة بين الدماغ والحاسوب تثير الأحاسيس اللمسية", 
+            authors: "س. س. ه. لي، ج. س. كيم، ج. ه. بارك، وآخرون", 
+            journal: "مجلة نيتشر، 2019", 
+            summary: "توضح هذه الورقة واجهة بين الدماغ والحاسوب يمكنها خلق أحاسيس لمسية، وهي خطوة كبيرة نحو إنشاء أطراف صناعية يمكنها 'الشعور'.", 
+            url: "https://doi.org/10.1038/s41586-019-1744-z" 
+        },
+    ],
+    conferences: [
+        { name: "معرض ميديكا", location: "دوسلدورف، ألمانيا", date: "11-14 نوفمبر 2024", description: "أكبر معرض تجاري طبي في العالم، يغطي جميع جوانب الرعاية السريرية والمتنقلة.", url: "https://www.medica-tradefair.com/" },
+        { name: "آراب هيلث", location: "دبي، الإمارات العربية المتحدة", date: "27-30 يناير 2025", description: "المعرض الرائد للمعدات الطبية في الشرق الأوسط، يعرض أحدث الابتكارات في الرعاية الصحية.", url: "https://www.arabhealthonline.com/" },
+        { name: "MD&M West", location: "أنهايم، كاليفورنيا، الولايات المتحدة الأمريكية", date: "4-6 فبراير 2025", description: "أكبر حدث لتصميم وتصنيع الأجهزة الطبية في أمريكا الشمالية، يجمع محترفي التكنولوجيا الطبية.", url: "https://www.imengineeringwest.com/en/show-brands/mdm-west.html" },
+        { name: "FIME", location: "ميامي، فلوريدا، الولايات المتحدة الأمريكية", date: "18-20 يونيو 2025", description: "معرض فلوريدا الطبي الدولي (FIME) هو أكبر معرض تجاري طبي في الأمريكتين.", url: "https://www.fimeshow.com/" },
+        { name: "الاجتماع السنوي لجمعية الأشعة بأمريكا الشمالية (RSNA)", location: "شيكاغو، إلينوي، الولايات المتحدة الأمريكية", date: "1-5 ديسمبر 2024", description: "المنتدى السنوي الرائد في مجال الأشعة، يعرض أحدث ما توصلت إليه تكنولوجيا وأبحاث التصوير الطبي.", url: "https://www.rsna.org/annual-meeting" },
+        { name: "معرض كومباميد", location: "دوسلدورف، ألمانيا", date: "11-14 نوفمبر 2024", description: "حلول التكنولوجيا الفائقة للتكنولوجيا الطبية. المعرض التجاري الدولي الرائد لموردي صناعة الأجهزة الطبية.", url: "https://www.compamed-tradefair.com/" }
+    ],
+  },
+};
+
+const simulateApiCall = <T>(data: T): Promise<T> => {
+    return new Promise(resolve => setTimeout(() => resolve(data), 200 + Math.random() * 300));
+};
+
+export const getDeviceCategories = async (language: 'en' | 'ar'): Promise<DeviceCategory[]> => {
+    return simulateApiCall(staticData[language].deviceCategories);
+};
+
+export const getDeviceDetails = async (deviceName: string, language: 'en' | 'ar'): Promise<DeviceDetails> => {
+    const detailsStore = staticData[language].deviceDetails;
+    const details = detailsStore[deviceName as keyof typeof detailsStore];
+
+    if (!details) {
+        throw new Error(`Details not found for device: ${deviceName} in language ${language}`);
+    }
+    return simulateApiCall(details);
+};
+
+
+export const getScientificBooks = async (language: 'en' | 'ar'): Promise<Book[]> => {
+    return simulateApiCall(staticData[language].books);
+};
+
+export const getScientificBookDetails = async (book: Book, language: 'en' | 'ar'): Promise<BookDetails> => {
+    const detailsStore = staticData[language].bookDetails;
+    const details = detailsStore[book.title as keyof typeof detailsStore];
+    if (!details) {
+        return simulateApiCall({ ...book, summary: language === 'ar' ? "الملخص غير متوفر لهذا الكتاب في البيانات الثابتة." : "Summary not available for this book in the static data." });
+    }
+    return simulateApiCall(details);
+};
+
+export const getGlobalArticles = async (language: 'en' | 'ar'): Promise<Article[]> => {
+    const articles = staticData[language].articles;
+    if (!articles || articles.length === 0) {
+        return simulateApiCall(staticData.en.articles);
+    }
+    return simulateApiCall(articles);
+};
+
+export const getConferencesAndExhibitions = async (language: 'en' | 'ar'): Promise<Conference[]> => {
+    const conferences = staticData[language].conferences;
+    if(!conferences || conferences.length === 0) {
+        return simulateApiCall(staticData.en.conferences);
+    }
+    return simulateApiCall(conferences);
+};
+
+export const translateText = async (textToTranslate: string): Promise<string> => {
+    try {
+        const prompt = `Translate the following English text to Arabic:\n\n---\n\n${textToTranslate}\n\n---\n\nArabic Translation:`;
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Error during translation API call:", error);
+        throw new Error("Failed to translate text.");
+    }
+};
